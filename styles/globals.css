@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+*,*::before,*::after{
+    box-sizing: border-box;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    font: inherit;
+}
+
+.postcard-icon-container{
+    @apply flex items-center space-x-3
+}
+
+.postcard-icon{
+    @apply cursor-pointer text-2xl
+}

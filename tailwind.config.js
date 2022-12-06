@@ -6,7 +6,11 @@ module.exports = {
     "./layouts/**/*.{js,ts,jsx,tsx}"
   ],
   theme: {
-    extend: {},
+    extend: {
+      gridTemplateRows:{
+        'postcard': '1fr 5fr 1fr 1fr'
+      }
+    },
   },
   plugins: [],
 };
