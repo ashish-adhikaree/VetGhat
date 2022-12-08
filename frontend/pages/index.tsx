@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import CreatePostCardExtended from '../components/post/createPostCardExtended'
 import CreatePostCardMini from '../components/post/createPostCardMini'
 import Post from '../components/post/post'
 
@@ -11,6 +12,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <CreatePostCardMini/>
+      <CreatePostCardExtended/>
       <Post/>
       <Post/>
       <Post/>

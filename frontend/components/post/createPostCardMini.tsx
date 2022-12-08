@@ -10,7 +10,7 @@ const CreatePostCardMini = () => {
     e.preventDefault();
   };
   return (
-    <div className="flex items-center bg-white w-2/3 p-3 space-x-3 rounded-md">
+    <div className="flex items-center bg-white w-2/3 md:w-1/2 lg:w-1/3 p-3 space-x-3 rounded-md">
       <UserAvatar src="/profile.png" />
       <form className=" text-gray-400 flex items-center justify-evenly flex-grow bg-gray-50 rounded-md">
         <button
