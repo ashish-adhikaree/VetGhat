@@ -1,0 +1,58 @@
+{
+  "kind": "collectionType",
+  "collectionName": "posts",
+  "info": {
+    "singularName": "post",
+    "pluralName": "posts",
+    "displayName": "Post",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "caption": {
+      "type": "string",
+      "required": false
+    },
+    "isPublic": {
+      "type": "boolean",
+      "required": true
+    },
+    "content": {
+      "type": "media",
+      "multiple": true,
+      "required": true,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "hearts": {
+      "type": "json"
+    },
+    "comments": {
+      "type": "json"
+    },
+    "heartcount": {
+      "type": "integer",
+      "default": 0
+    },
+    "commentcount": {
+      "type": "integer",
+      "default": 0
+    },
+    "sharecount": {
+      "type": "integer",
+      "default": 0
+    },
+    "author": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    }
+  }
+}

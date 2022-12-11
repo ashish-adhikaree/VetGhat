@@ -8,7 +8,8 @@ module.exports = {
   theme: {
     extend: {
       gridTemplateRows:{
-        'postcard': '1fr 5fr 1fr 1fr'
+        'postcard': '1fr 5fr 1fr 1fr',
+        'postcardwithcaption': '1fr 1fr 5fr 1fr 1fr'
       }
     },
   },

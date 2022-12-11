@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,11 +6,15 @@
 *,*::before,*::after{
     box-sizing: border-box;
 }
+body{
+    background-color: rgb(243 244 246);
+}
 
 *{
     margin: 0;
     padding: 0;
     font: inherit;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .postcard-icon-container{
@@ -18,4 +23,11 @@
 
 .postcard-icon{
     @apply cursor-pointer text-2xl
+}
+
+.authentication-input-container{
+    @apply flex items-center space-x-4 text-gray-400 bg-gray-50 w-full py-2 px-5 rounded-md hover:bg-gray-100 focus-within:bg-gray-100
+}
+.authentication-input{
+    @apply bg-transparent py-2 outline-none border-none w-full
 }
