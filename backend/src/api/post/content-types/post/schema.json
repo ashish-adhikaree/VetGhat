@@ -8,7 +8,7 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": true
+    "draftAndPublish": false
   },
   "pluginOptions": {},
   "attributes": {
@@ -31,12 +31,6 @@
         "audios"
       ]
     },
-    "hearts": {
-      "type": "json"
-    },
-    "comments": {
-      "type": "json"
-    },
     "heartcount": {
       "type": "integer",
       "default": 0
@@ -52,6 +46,16 @@
     "author": {
       "type": "relation",
       "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "comments": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::comment.comment"
+    },
+    "hearts": {
+      "type": "relation",
+      "relation": "oneToMany",
       "target": "plugin::users-permissions.user"
     }
   }

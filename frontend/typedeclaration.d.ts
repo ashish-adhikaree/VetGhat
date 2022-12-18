@@ -21,8 +21,17 @@ export interface Post{
     postedAt: string,
 }
 
+// Signup or Login Form
 export interface LoginValue {
     name?: String,
     email?: String,
-    password?: String
+    password?: String,
+    privacyCheck? : boolean,
+    confirmPassword?: string
+}
+
+// Alert Component props
+export interface AlertType{
+    type: "success" | "error" | string,
+    body: string
 }

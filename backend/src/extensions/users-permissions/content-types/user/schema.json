@@ -64,11 +64,12 @@
       "configurable": false
     },
     "profilepic": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
       "allowedTypes": [
         "images"
-      ],
-      "type": "media",
-      "multiple": false
+      ]
     },
     "bio": {
       "type": "string"
@@ -82,10 +83,14 @@
       "default": 0
     },
     "followers": {
-      "type": "json"
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::users-permissions.user"
     },
-    "following": {
-      "type": "json"
+    "followings": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::users-permissions.user"
     }
   }
 }

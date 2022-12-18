@@ -1,5 +1,4 @@
 import Cookie from "js-cookie";
-import { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
 import LoginCard from "../components/authentication/loginCard";
 import SignupCard from "../components/authentication/signupCard";
@@ -8,9 +7,10 @@ import { parseCookie } from "../lib/parseCookies";
 
 const Login = ({ initialjwt }: any) => {
   const [jwt, setjwt] = useState(() => initialjwt);
-
   useEffect(() => {
-    Cookie.set("jwt", jwt);
+    if (jwt != undefined) {
+      Cookie.set("jwt", jwt);
+    }
   }, [jwt]);
 
   const [isLoginCardVisible, setLoginCardVisibility] = useState(true);
@@ -30,15 +30,17 @@ const Login = ({ initialjwt }: any) => {
 
 export default Login;
 
-export const getServerSideProps = dontrequireAuthentication(
-  async(ctx)=>{
-    const {req} = ctx
-    const cookies = parseCookie(req);
+export const getServerSideProps = dontrequireAuthentication(async (ctx) => {
+  const { req } = ctx;
+  const cookies = parseCookie(req);
+  if (cookies.jwt) {
     return {
-      props:{
-        initialjwt: cookies
-      }
-    }
+      props: {
+        initialjwt: cookies.jwt,
+      },
+    };
   }
-)
-
+  return {
+    props: {},
+  };
+});

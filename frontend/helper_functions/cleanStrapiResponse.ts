@@ -1,12 +1,13 @@
 import { Post, User } from "../typedeclaration";
 
 export const CleanPostResponse = (post: any) => {
+  console.log()
   const SinglePost: Post = {
     id: post.id,
     author: {
       id: post.attributes.author.data.id,
       name: post.attributes.author.data.attributes.username,
-      profilepic:{url:post.attributes.author.data.attributes.profilepic.data.attributes.url},
+      profilepic:post.attributes.author.data.attributes.profilepic.data !== null? {url:post.attributes.author.data.attributes.profilepic.data.attributes.url}:{url:"/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z"},
     },
     caption: post.attributes.caption,
     content: post.attributes.content.data.map((image:any)=>{
@@ -17,28 +18,8 @@ export const CleanPostResponse = (post: any) => {
     heartcount: post.attributes.heartcount,
     sharecount: post.attributes.sharecount,
     commentcount: post.attributes.commentcount,
-    hearts:
-      post.attributes.hearts != null
-        ? post.attributes.hearts.data.map((user: any) => {
-            const SingleUser: User = {
-              id: user.id,
-              name: user.username,
-              profilepic: user.profilepic,
-            };
-            return SingleUser;
-          })
-        : {},
-    comments:
-      post.attributes.comments != null
-        ? post.attributes.comments.data.map((user: any) => {
-            const SingleUser: User = {
-              id: user.id,
-              name: user.username,
-              profilepic: user.profilepic,
-            };
-            return SingleUser;
-          })
-        : {},
+    hearts:[],
+    comments:[],
     postedAt: post.attributes.publishedAt,
   };
   return SinglePost;

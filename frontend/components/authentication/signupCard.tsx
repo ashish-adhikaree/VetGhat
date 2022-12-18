@@ -7,14 +7,20 @@ import {
   AiOutlineEye,
   AiOutlineEyeInvisible,
 } from "react-icons/ai";
-import { client } from "../../apolloClient";
+import { createClient } from "../../apolloClient";
 import { SignUp } from "../../lib/mutation";
-import { LoginValue } from "../../typedeclaration";
+import { AlertType, LoginValue } from "../../typedeclaration";
+import Alert from "../alert/alert";
+
+
 
 const SignupCard = ({ switchCards, setjwt }: any) => {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
 
   const [formValue, setformValue] = useState<LoginValue>();
+
+  const [alert, setAlert] = useState<AlertType>()
+
   
   const router = useRouter()
 
@@ -24,13 +30,16 @@ const SignupCard = ({ switchCards, setjwt }: any) => {
   };
 
   const handleInputChange = (e: any) => {
-    const updatedFormValue = { ...formValue, [e.target.name]: e.target.value };
+    const updatedFormValue = e.target.name ==="privacyCheck" ? {...formValue, [e.target.name]: e.target.checked }:{ ...formValue, [e.target.name]: e.target.value };
     setformValue(updatedFormValue);
   };
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    client
+    if (formValue?.name && formValue?.email && formValue.password && formValue?.confirmPassword && formValue?.privacyCheck){
+      if (formValue.confirmPassword === formValue.password){
+        const client = createClient("")
+        client
       .mutate({
         mutation: SignUp,
         variables:{
@@ -40,12 +49,31 @@ const SignupCard = ({ switchCards, setjwt }: any) => {
         }
       })
       .then((res) => {
-        console.log(res);
+        setAlert({
+          type: "success",
+          body:"Account Created Successfully. Redirecting..."
+        })
+        setjwt(res.data?.register?.jwt)
         router.push('/')
       })
       .catch((error) => {
-        console.log(error);
+        setAlert({
+          type: "error",
+          body:error.message
+        })
       });
+      }else{
+        setAlert({
+          type: "success",
+          body:"Two Passwords Do Not Match"
+        })
+      }
+    }else{
+      setAlert({
+        type: "error",
+        body:"Fill up the form first"
+      })
+    }
   };
 
   return (
@@ -55,6 +83,8 @@ const SignupCard = ({ switchCards, setjwt }: any) => {
           SignUp
         </p>
       </div>
+      {alert && <div className="px-8">
+        <Alert type={alert.type} body={alert.body}/></div>}
       <form
         onSubmit={handleSubmit}
         action="SignUp"
@@ -99,13 +129,15 @@ const SignupCard = ({ switchCards, setjwt }: any) => {
         <div className=" authentication-input-container">
           <AiOutlineLock />
           <input
+            name="confirmPassword"
             type="password"
             placeholder="Confirm your password"
             className="authentication-input"
+            onChange = {handleInputChange}
           />
         </div>
-        <div className="flex space-x-5 px-5 font-semibold pb-10 pt-5">
-          <input type="checkbox" className="" />
+        <div className="flex space-x-5 px-5 font-semibold pt-5">
+          <input type="checkbox" className="" name="privacyCheck" onChange={handleInputChange}/>
           <p>I agree to all the terms and condition.</p>
         </div>
         <button
@@ -114,7 +146,7 @@ const SignupCard = ({ switchCards, setjwt }: any) => {
         >
           Create Account
         </button>
-        <p className="font-semibold">
+        <p className="font-semibold pt-10">
           Already have an account?{" "}
           <button
             onClick={(e) => {

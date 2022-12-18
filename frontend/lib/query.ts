@@ -29,8 +29,6 @@ query GetPosts{
               }
             }
           }
-          hearts
-          comments
           heartcount
           commentcount
           sharecount

@@ -7,14 +7,17 @@ import {
   AiOutlineEyeInvisible,
 } from "react-icons/ai";
 
-import { client } from "../../apolloClient";
+import { createClient } from "../../apolloClient";
 import { Login } from "../../lib/mutation";
-import { LoginValue } from "../../typedeclaration";
+import { AlertType, LoginValue } from "../../typedeclaration";
+import Alert from "../alert/alert";
 
 const LoginCard = ({ switchCards , setjwt}: any) => {  
   const [isPasswordVisible, setPasswordVisible] = useState(false);
 
   const [formValue, setformValue] = useState<LoginValue>();
+
+  const [alert, setAlert] = useState<AlertType>()
 
   const router = useRouter()
 
@@ -24,14 +27,20 @@ const LoginCard = ({ switchCards , setjwt}: any) => {
   };
 
   const handleInputChange = (e: any) => {
-    const updatedFormValue = { ...formValue, [e.target.name]: e.target.value };
+    const updatedFormValue = e.target.name ==="privacyCheck" ? {...formValue, [e.target.name]: e.target.checked }:{ ...formValue, [e.target.name]: e.target.value };
     setformValue(updatedFormValue);
   };
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
     console.log(formValue);
-    client
+    if (formValue?.email && formValue?.password && formValue?.privacyCheck){
+      setAlert({
+        type: "",
+        body: ""
+      })
+      const client = createClient("")
+      client
       .mutate({
         mutation: Login,
         variables:{
@@ -40,25 +49,39 @@ const LoginCard = ({ switchCards , setjwt}: any) => {
         }
       })
       .then((res) => {
-        console.log(res);
+        setAlert({
+          type: "success",
+          body:"Logged in Successfully. Redirecting..."
+        })
         setjwt(res.data?.login?.jwt)
         router.push('/')
       })
       .catch((error) => {
-        console.log(error);
+        setAlert({
+          type: "error",
+          body:error.message
+        })
       });
+    }else{
+      setAlert({
+        type: "error",
+        body:"Fill up the form first"
+      })
+    }
   };
   return (
-    <div className="w-2/3 md:w-1/2 lg:w-1/3 bg-white">
+    <div className="w-2/3 md:w-1/2 lg:w-1/3 bg-white rounded-md">
       <div className="relative">
         <p className="font-bold text-xl pt-10 pb-2 px-8 before:content-[' '] before:w-10 before:h-1 before:bg-purple-500 before:absolute before:bottom-0">
           LogIn
         </p>
       </div>
+      {alert && <div className="px-8">
+        <Alert type={alert.type} body={alert.body}/></div>}
       <form
         onSubmit={handleSubmit}
         action="Login"
-        className="space-y-3 py-10 flex flex-col items-center px-8"
+        className="space-y-3 py-10 pt-5 flex flex-col items-center px-8"
       >
         <div className=" authentication-input-container">
           <AiOutlineMail />
@@ -86,8 +109,8 @@ const LoginCard = ({ switchCards , setjwt}: any) => {
             {isPasswordVisible ? <AiOutlineEye /> : <AiOutlineEyeInvisible />}
           </button>
         </div>
-        <div className="flex space-x-5 px-5 font-semibold pb-10 pt-5">
-          <input type="checkbox" className="" />
+        <div className="flex space-x-5 px-5 font-semibold pt-5">
+          <input type="checkbox" className="" name="privacyCheck" onChange={handleInputChange}/>
           <p>I agree to all the terms and condition.</p>
         </div>
         <button
@@ -96,7 +119,7 @@ const LoginCard = ({ switchCards , setjwt}: any) => {
         >
           Login
         </button>
-        <p className="font-semibold">
+        <p className="font-semibold pt-10">
           Do not have an account?
           <button
             onClick={(e) => {

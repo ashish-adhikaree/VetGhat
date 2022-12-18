@@ -2,16 +2,16 @@ import Head from "next/head";
 import CreatePostCardExtended from "../components/post/createPostCardExtended";
 import CreatePostCardMini from "../components/post/createPostCardMini";
 import PostCard from "../components/post/postCard";
-import { client } from "../apolloClient";
-import { GetServerSideProps, GetStaticProps } from "next";
+import { createClient } from "../apolloClient";
 import { GetPosts } from "../lib/query";
 import { Post } from "../typedeclaration";
 import { CleanPostResponseArray } from "../helper_functions/cleanStrapiResponse";
 import { useState } from "react";
 import { requireAuthentication } from "../HOC/authentication/authentication";
+import { parseCookie } from "../lib/parseCookies";
 
 
-export default function Home({ posts }: { posts: Post[] }) {
+export default function Home({ posts, jwt }: { posts: Post[], jwt:string }) {
   const [postCardExtendedIsVisible, setpostCardExtendedIsVisible] =
     useState(false);
   const changePostCardExtendedState = (state: boolean) => {
@@ -30,6 +30,7 @@ export default function Home({ posts }: { posts: Post[] }) {
         />
         {postCardExtendedIsVisible && (
           <CreatePostCardExtended
+            jwt = {jwt}
             closePostCardExtended={changePostCardExtendedState}
           />
         )}
@@ -43,12 +44,16 @@ export default function Home({ posts }: { posts: Post[] }) {
 
 export const getServerSideProps = requireAuthentication(
   async(ctx)=>{
+    const { req } = ctx;
+    const cookies = parseCookie(req);
+    const client = createClient(cookies.jwt)
     const { data } = await client.query({
       query: GetPosts,
     });
     return {
       props: {
         posts: CleanPostResponseArray(data.posts.data),
+        jwt: cookies.jwt
       },
     };
   }

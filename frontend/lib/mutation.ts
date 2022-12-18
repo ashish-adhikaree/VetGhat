@@ -21,3 +21,21 @@ mutation Login($email: String!, $password: String!){
       }
 }
 `
+export const createPost = gql`
+mutation createPost{
+  createPost(data:{isPublic: true, author:"1"}){
+    data{
+      attributes{
+        isPublic
+        author{
+          data{
+            attributes{
+              username
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`

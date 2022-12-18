@@ -1,6 +1,8 @@
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { parseCookie } from "../../lib/parseCookies";
 
+
+
 export function requireAuthentication(gssp : GetServerSideProps) {
     return async (context: GetServerSidePropsContext) => {
         const { req } = context;

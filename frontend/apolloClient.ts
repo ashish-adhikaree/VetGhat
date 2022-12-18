@@ -3,7 +3,9 @@ import {
     InMemoryCache,
     HttpLink,
     from,
+    ApolloLink
 } from "@apollo/client";
+
 import { onError } from "@apollo/client/link/error";
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
@@ -18,14 +20,32 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
     }
 });
 
-const link = from([
-    errorLink,
-    new HttpLink({
-        uri: process.env.URI || "http://localhost:1337/graphql",
-    }),
-]);
+export const createClient = (jwx: string) => {
+    const link = from([
+        errorLink,
+        new HttpLink({
+            uri: process.env.URI || "http://localhost:1337/graphql",
+        }),
+    ]);
+    
+    const authLink = new ApolloLink((operation, forward) => {
+        // Retrieve the authorization token from local storage.
+        const token = jwx
+        // Use the setContext method to set the HTTP headers.
+        operation.setContext({
+          headers: {
+            authorization: token ? `Bearer ${token}` : ''
+          }
+        });
+      
+        // Call the next link in the middleware chain.
+        return forward(operation);
+      });
+    
+    const client = new ApolloClient({
+        cache: new InMemoryCache(),
+        link: authLink.concat(link), // Chain it with the HttpLink
+    });
 
-export const client = new ApolloClient({
-    cache: new InMemoryCache(),
-    link,
-});
+    return client
+}
