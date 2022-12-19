@@ -20,7 +20,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
     }
 });
 
-export const createClient = (jwx: string) => {
+export const createClient = (jwt: string) => {
     const link = from([
         errorLink,
         new HttpLink({
@@ -30,7 +30,7 @@ export const createClient = (jwx: string) => {
     
     const authLink = new ApolloLink((operation, forward) => {
         // Retrieve the authorization token from local storage.
-        const token = jwx
+        const token = jwt
         // Use the setContext method to set the HTTP headers.
         operation.setContext({
           headers: {

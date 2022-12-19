@@ -6,6 +6,9 @@ export interface User {
     id: string,
     name: string,
     profilepic: ImageType,
+    followersCount? :number,
+    followingCount? : number,
+    posts?: number
 }
 
 export interface Post{
@@ -34,4 +37,11 @@ export interface LoginValue {
 export interface AlertType{
     type: "success" | "error" | string,
     body: string
+}
+
+// Post form Data 
+export interface PostFormData{
+    isPublic?: boolean,
+    caption?: string
+    files?: [any]
 }

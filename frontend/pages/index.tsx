@@ -7,7 +7,6 @@ import { GetPosts } from "../lib/query";
 import { Post } from "../typedeclaration";
 import { CleanPostResponseArray } from "../helper_functions/cleanStrapiResponse";
 import { useState } from "react";
-import { requireAuthentication } from "../HOC/authentication/authentication";
 import { parseCookie } from "../lib/parseCookies";
 
 
@@ -18,13 +17,13 @@ export default function Home({ posts, jwt }: { posts: Post[], jwt:string }) {
     setpostCardExtendedIsVisible(state);
   };
   return (
-    <div className={`min-h-screen ${postCardExtendedIsVisible? 'h-screen overflow-hidden' : ''}`}>
+    <div className={`min-h-screen ${postCardExtendedIsVisible? 'h-screen' : ''}`}>
       <Head>
         <title>VetGhat</title>
         <meta name="description" content="Developed by Ashish" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className="space-y-5">
+      <div className="space-y-5 flex flex-col items-center">
         <CreatePostCardMini
           openPostCardExtended={changePostCardExtendedState}
         />
@@ -42,8 +41,7 @@ export default function Home({ posts, jwt }: { posts: Post[], jwt:string }) {
   );
 }
 
-export const getServerSideProps = requireAuthentication(
-  async(ctx)=>{
+export const getServerSideProps = async(ctx: any)=>{
     const { req } = ctx;
     const cookies = parseCookie(req);
     const client = createClient(cookies.jwt)
@@ -57,4 +55,3 @@ export const getServerSideProps = requireAuthentication(
       },
     };
   }
-)

@@ -2,7 +2,6 @@ import Cookie from "js-cookie";
 import { useEffect, useState } from "react";
 import LoginCard from "../components/authentication/loginCard";
 import SignupCard from "../components/authentication/signupCard";
-import { dontrequireAuthentication } from "../HOC/authentication/authentication";
 import { parseCookie } from "../lib/parseCookies";
 
 const Login = ({ initialjwt }: any) => {
@@ -30,7 +29,7 @@ const Login = ({ initialjwt }: any) => {
 
 export default Login;
 
-export const getServerSideProps = dontrequireAuthentication(async (ctx) => {
+export const getServerSideProps = async (ctx:any) => {
   const { req } = ctx;
   const cookies = parseCookie(req);
   if (cookies.jwt) {
@@ -43,4 +42,4 @@ export const getServerSideProps = dontrequireAuthentication(async (ctx) => {
   return {
     props: {},
   };
-});
+}

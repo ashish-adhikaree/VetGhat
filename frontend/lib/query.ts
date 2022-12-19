@@ -21,7 +21,7 @@ query GetPosts{
           }}
           isPublic
           caption
-          publishedAt
+          createdAt
           content{
             data{
               attributes{
@@ -37,8 +37,27 @@ query GetPosts{
     }
   }
   
-`;
+`
 
-
-
-  
+export const GetProfile = gql`
+query GetProfile($id: ID!){
+  usersPermissionsUser(id:$id){
+    data{
+    id
+    attributes{
+      username
+      profilepic{
+        data{
+          attributes{
+            url
+          }
+        }
+      }
+      followersCount
+      followingCount
+      posts
+    }
+  }
+  }
+}
+`

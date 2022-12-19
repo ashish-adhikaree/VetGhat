@@ -91,6 +91,10 @@
       "type": "relation",
       "relation": "oneToMany",
       "target": "plugin::users-permissions.user"
+    },
+    "posts": {
+      "type": "integer",
+      "default": 0
     }
   }
 }

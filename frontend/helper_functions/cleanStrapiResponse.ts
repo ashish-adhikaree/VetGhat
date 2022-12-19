@@ -1,7 +1,6 @@
 import { Post, User } from "../typedeclaration";
 
 export const CleanPostResponse = (post: any) => {
-  console.log()
   const SinglePost: Post = {
     id: post.id,
     author: {
@@ -20,7 +19,7 @@ export const CleanPostResponse = (post: any) => {
     commentcount: post.attributes.commentcount,
     hearts:[],
     comments:[],
-    postedAt: post.attributes.publishedAt,
+    postedAt: post.attributes.createdAt,
   };
   return SinglePost;
 };
@@ -31,3 +30,15 @@ export const CleanPostResponseArray = (posts: any) => {
     return temp;
   });
 };
+
+export const CleanUserResponse = (user:any)=>{
+  const temp: User = {
+    id: user.id,
+    name:user.data.attributes.username,
+    profilepic:user.data.attributes.profilepic.data !== null ?{url:user.data.attributes.profilepic.data.attributes.url}:{url:"/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z"},
+    followersCount: user.data.attributes.followersCount,
+    followingCount: user.data.attributes.followingCount,
+    posts: user.data.attributes.posts  
+  }
+  return temp
+}
