@@ -14,7 +14,7 @@ import Alert from "../alert/alert";
 
 
 
-const SignupCard = ({ switchCards, setjwt }: any) => {
+const SignupCard = ({ switchCards, setjwt, setuid}: any) => {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
 
   const [formValue, setformValue] = useState<LoginValue>();
@@ -54,6 +54,7 @@ const SignupCard = ({ switchCards, setjwt }: any) => {
           body:"Account Created Successfully. Redirecting..."
         })
         setjwt(res.data?.register?.jwt)
+        setuid(res.data.register.user.id)
         router.push('/')
       })
       .catch((error) => {

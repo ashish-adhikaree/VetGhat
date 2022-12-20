@@ -68,7 +68,7 @@ const CreatePostCardExtended = ({
   };
 
   return (
-    <div className="h-full w-full flex items-center justify-center fixed bottom-0 left-0 z-50 bg-black bg-opacity-60">
+    <div className="h-full w-full flex items-center justify-center fixed bottom-0 left-0 z-[200] bg-black bg-opacity-60">
       <div className="w-2/3 md:w-1/2 lg:w-1/3 bg-white rounded-xl space-y-6">
         <div className="relative border-b text-center font-bold text-xl py-3">
           Create Post

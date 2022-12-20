@@ -1,4 +1,4 @@
-import { Post, User } from "../typedeclaration";
+import { Post, ProfilePost, User } from "../typedeclaration";
 
 export const CleanPostResponse = (post: any) => {
   const SinglePost: Post = {
@@ -30,6 +30,23 @@ export const CleanPostResponseArray = (posts: any) => {
     return temp;
   });
 };
+
+export const CleanProfilePostResponse = (post:any) =>{
+  const SinglePost: ProfilePost = {
+    id: post.id,
+    thumbnail: {url:post.attributes.content.data[0].attributes.url},
+    heartcount: post.attributes.heartcount,
+    commentcount: post.attributes.commentcount,
+  };
+  return SinglePost;
+}
+
+export const CleanProfilePostResponseArray = (posts:any) =>{
+  return posts.map((post: any) => {
+    const temp: ProfilePost = CleanProfilePostResponse(post);
+    return temp;
+  });
+}
 
 export const CleanUserResponse = (user:any)=>{
   const temp: User = {

@@ -24,6 +24,13 @@ export interface Post{
     postedAt: string,
 }
 
+export interface ProfilePost{
+    id: string,
+    thumbnail:ImageType
+    heartcount: number,
+    commentcount: number,
+}
+
 // Signup or Login Form
 export interface LoginValue {
     name?: String,

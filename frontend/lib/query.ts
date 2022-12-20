@@ -61,3 +61,24 @@ query GetProfile($id: ID!){
   }
 }
 `
+
+export const GetProfilePosts = gql`
+query GetPosts($id: ID!){
+  posts(filters: { author: { id: {eq: $id}}}, sort: "createdAt:desc"){
+    data{
+      id
+      attributes{
+        commentcount
+        heartcount
+        content{
+          data{
+            attributes{
+              url
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`

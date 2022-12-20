@@ -17,7 +17,10 @@ export const SignUp = gql`
 export const Login = gql`
 mutation Login($email: String!, $password: String!){
     login(input: { identifier: $email, password: $password }) {
-        jwt
+        jwt,
+        user{
+          id
+        }
       }
 }
 `

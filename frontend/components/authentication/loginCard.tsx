@@ -12,7 +12,7 @@ import { Login } from "../../lib/mutation";
 import { AlertType, LoginValue } from "../../typedeclaration";
 import Alert from "../alert/alert";
 
-const LoginCard = ({ switchCards , setjwt}: any) => {  
+const LoginCard = ({ switchCards , setjwt, setuid}: any) => {  
   const [isPasswordVisible, setPasswordVisible] = useState(false);
 
   const [formValue, setformValue] = useState<LoginValue>();
@@ -33,7 +33,6 @@ const LoginCard = ({ switchCards , setjwt}: any) => {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    console.log(formValue);
     if (formValue?.email && formValue?.password && formValue?.privacyCheck){
       setAlert({
         type: "",
@@ -54,6 +53,7 @@ const LoginCard = ({ switchCards , setjwt}: any) => {
           body:"Logged in Successfully. Redirecting..."
         })
         setjwt(res.data?.login?.jwt)
+        setuid(res.data.login.user.id)
         router.push('/')
       })
       .catch((error) => {

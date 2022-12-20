@@ -4,13 +4,15 @@ import LoginCard from "../components/authentication/loginCard";
 import SignupCard from "../components/authentication/signupCard";
 import { parseCookie } from "../lib/parseCookies";
 
-const Login = ({ initialjwt }: any) => {
-  const [jwt, setjwt] = useState(() => initialjwt);
+const Login = () => {
+  const [jwt, setjwt] = useState();
+  const [uid, setuid] = useState(''); 
   useEffect(() => {
     if (jwt != undefined) {
       Cookie.set("jwt", jwt);
+      Cookie.set("uid", uid)
     }
-  }, [jwt]);
+  }, [jwt, uid]);
 
   const [isLoginCardVisible, setLoginCardVisibility] = useState(true);
   const switchCards = () => {
@@ -19,9 +21,9 @@ const Login = ({ initialjwt }: any) => {
   return (
     <div className="min-h-screen flex items-center justify-center">
       {isLoginCardVisible ? (
-        <LoginCard switchCards={switchCards} setjwt={setjwt} />
+        <LoginCard switchCards={switchCards} setjwt={setjwt} setuid={setuid}/>
       ) : (
-        <SignupCard switchCards={switchCards} setjwt={setjwt} />
+        <SignupCard switchCards={switchCards} setjwt={setjwt} setuid={setuid}/>
       )}
     </div>
   );
