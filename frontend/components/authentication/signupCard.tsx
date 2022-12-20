@@ -65,7 +65,7 @@ const SignupCard = ({ switchCards, setjwt, setuid}: any) => {
       });
       }else{
         setAlert({
-          type: "success",
+          type: "error",
           body:"Two Passwords Do Not Match"
         })
       }

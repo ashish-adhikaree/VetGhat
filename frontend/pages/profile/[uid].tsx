@@ -30,42 +30,45 @@ const Profile = () => {
   });
   const router = useRouter();
   useEffect(() => {
-    const id = router.query.slug;
-    const jwt = cookieCutter.get("jwt");
-    const client = createClient(jwt);
-    const uid = cookieCutter.get("uid");
-    if (id === uid) setIsUser(true);
+    if (router.query.uid) {
+      const id = router.query.uid;
+      console.log("id", id);
+      const jwt = cookieCutter.get("jwt");
+      const client = createClient(jwt);
+      const uid = cookieCutter.get("uid");
+      if (id === uid) setIsUser(true);
 
-    // Getting profile info
-    client
-      .query({
-        query: GetProfile,
-        variables: {
-          id: id,
-        },
-      })
-      .then((res) => {
-        if (res.data.usersPermissionsUser.data !== null) {
-          setUserDetails(CleanUserResponse(res.data.usersPermissionsUser));
-          setLoading(false);
-        }
-      })
-      .catch((err) => console.log(err));
+      // Getting profile info
+      client
+        .query({
+          query: GetProfile,
+          variables: {
+            id: id,
+          },
+        })
+        .then((res) => {
+          if (res.data.usersPermissionsUser.data !== null) {
+            setUserDetails(CleanUserResponse(res.data.usersPermissionsUser));
+            setLoading(false);
+          }
+        })
+        .catch((err) => console.log(err));
 
-    // Getting Posts
-    client
-      .query({
-        query: GetProfilePosts,
-        variables: {
-          id: id,
-        },
-      })
-      .then((res) => {
-        setPosts(CleanProfilePostResponseArray(res.data?.posts.data));
-        console.log(res);
-      })
-      .catch((err) => console.log(err));
-  }, []);
+      // Getting Posts
+      client
+        .query({
+          query: GetProfilePosts,
+          variables: {
+            id: id,
+          },
+        })
+        .then((res) => {
+          setPosts(CleanProfilePostResponseArray(res.data?.posts.data));
+          console.log(res);
+        })
+        .catch((err) => console.log(err));
+    }
+  }, [router]);
 
   if (loading) {
     return <Loader />;
@@ -99,16 +102,3 @@ const Profile = () => {
 };
 
 export default Profile;
-
-export const getStaticProps: GetStaticProps = () => {
-  return {
-    props: {},
-  };
-};
-
-export const getStaticPaths: GetStaticPaths = () => {
-  return {
-    paths: [],
-    fallback: "blocking",
-  };
-};

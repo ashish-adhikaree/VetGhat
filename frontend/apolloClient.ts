@@ -5,6 +5,7 @@ import {
   from,
   ApolloLink,
 } from "@apollo/client";
+import {createUploadLink} from "apollo-upload-client"
 
 import { onError } from "@apollo/client/link/error";
 
@@ -21,11 +22,13 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 });
 
 export const createClient = (jwt: string) => {
+  const uploadLink = createUploadLink({ uri: process.env.URI || "http://localhost:1337/graphql" });
   const link = from([
     errorLink,
-    new HttpLink({
-      uri: process.env.URI || "http://localhost:1337/graphql",
-    }),
+    uploadLink,
+    // new HttpLink({
+    //   uri: process.env.URI || "http://localhost:1337/graphql",
+    // }),
   ]);
 
   const authLink = new ApolloLink((operation, forward) => {

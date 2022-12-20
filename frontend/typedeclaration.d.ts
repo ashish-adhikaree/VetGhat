@@ -51,5 +51,5 @@ export interface AlertType{
 export interface PostFormData{
     isPublic?: boolean,
     caption?: string
-    files?: [any]
+    files?: any[]
 }

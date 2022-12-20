@@ -3,20 +3,22 @@ import { GiCancel } from "react-icons/gi";
 import { HiOutlinePhotograph } from "react-icons/hi";
 import React, { useState, useEffect } from "react";
 import { createClient } from "../../apolloClient";
-import { createPost } from "../../lib/mutation";
+import { createPost, uploadContent } from "../../lib/mutation";
 import { PostFormData } from "../../typedeclaration";
 import Image from "next/image";
 import { User } from "../../typedeclaration";
-import cookieCutter from "cookie-cutter"
+import cookieCutter from "cookie-cutter";
 
 const CreatePostCardExtended = ({
   closePostCardExtended,
   jwt,
-  user
+  user,
+  refreshPosts
 }: {
   closePostCardExtended: any;
   jwt: string;
-  user: User
+  user: User;
+  refreshPosts: any
 }) => {
   const [formData, setFormData] = useState<PostFormData>({ isPublic: true });
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
@@ -32,24 +34,19 @@ const CreatePostCardExtended = ({
   };
 
   const handleInput = async (e: any) => {
-    if (e.target.name === "images") {
+    if (e.target.name === "files") {
       if (e.target.files[0]) {
         setSelectedImages((initialArray) => [
           ...initialArray,
           URL.createObjectURL(e.target.files[0]),
         ]);
       }
-      // const temp = new FormData()
-      // if (e.target.files){
-      //   console.log(e.target.files)
-      //   temp.append('files',e.target.files[0])
-      //   console.log(temp)
-      //   await fetch('http://localhost:1337/api/upload', {
-      //     method: 'post',
-      //     body: temp
-      //   });
-      // }
-      setFormData({ ...formData, [e.target.name]: e.target.files[0] });
+      setFormData({
+        ...formData,
+        files: formData.files
+          ? [...formData.files, e.target.files[0]]
+          : [e.target.files[0]],
+      });
     } else if (e.target.name === "isPublic") {
       const temp = e.target.value === "true" ? true : false;
       setFormData({ ...formData, [e.target.name]: temp });
@@ -60,15 +57,34 @@ const CreatePostCardExtended = ({
 
   const handleSubmit = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
-    console.log(formData);
-    // const client = createClient(jwt)
-    // client.mutate({
-    //   mutation:createPost,
-    //   variables: {
-
-    //   }
-    // })
+    const client = createClient(jwt);
+    client
+      .mutate({
+        mutation: uploadContent,
+        variables: {
+          files: formData.files,
+        },
+      })
+      .then((res) => {
+        console.log(res)
+        client
+      .mutate({
+        mutation: createPost,
+        variables: {
+          isPublic: formData.isPublic,
+          authorid: user.id,
+          caption: formData.caption ? formData.caption : "",
+          content: res.data.multipleUpload.map((file:any)=>file.data.id)
+        },
+      })
+      .then((res) => {})
+      .catch((err) => console.log(err));
+      })
+      .catch((err) => console.log(err));
+    
+    refreshPosts(client)
     closePostCardExtended(false);
+    window.onscroll = () => {};
   };
 
   return (
@@ -102,7 +118,11 @@ const CreatePostCardExtended = ({
             name="caption"
             onChange={handleInput}
           />
-          <div className={`flex align-top space-x-3 w-[92%] ${selectedImages.length > 2? 'overflow-x-scroll': 'overflow-auto'} mx-3`}>
+          <div
+            className={`flex align-top space-x-3 w-[92%] ${
+              selectedImages.length > 2 ? "overflow-x-scroll" : "overflow-auto"
+            } mx-3`}
+          >
             {selectedImages &&
               selectedImages.map((src, index) => (
                 <Image

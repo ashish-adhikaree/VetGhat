@@ -51,7 +51,7 @@ export const CleanProfilePostResponseArray = (posts:any) =>{
 
 export const CleanUserResponse = (user:any)=>{
   const temp: User = {
-    id: user.id,
+    id: user.data.id,
     username:user.data.attributes.username,
     profilepic:user.data.attributes.profilepic.data !== null ?{url:user.data.attributes.profilepic.data.attributes.url}:{url:"/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z"},
     followersCount: user.data.attributes.followersCount,

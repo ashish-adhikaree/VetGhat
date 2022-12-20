@@ -15,6 +15,7 @@ import cookieCutter from "cookie-cutter";
 import Loader from "../components/post/loader";
 import LeftSidebar from "../components/leftsidebar/leftsidebar";
 import RightSidebar from "../components/rightsidebar/rightsidebar";
+import { ApolloClient, NormalizedCacheObject } from "@apollo/client";
 
 export default function Home() {
   const [posts, setPosts] = useState<Post[]>();
@@ -30,6 +31,20 @@ export default function Home() {
     followingCount: 0,
     posts: 0,
   });
+
+  const getPosts = (client:ApolloClient<NormalizedCacheObject>) =>{
+    client
+    .query({
+      query: GetPosts,
+    })
+    .then((res) => {
+      if (res.data.posts.data !== null) {
+        setPosts(CleanPostResponseArray(res.data.posts.data));
+        setIsLoading(false);
+      }
+    })
+    .catch((err) => console.log(err));
+  }
 
   useEffect(() => {
     setjwt(cookieCutter.get("jwt"));
@@ -48,18 +63,7 @@ export default function Home() {
         }
       })
       .catch((err) => console.log(err));
-
-    client
-      .query({
-        query: GetPosts,
-      })
-      .then((res) => {
-        if (res.data.posts.data !== null) {
-          setPosts(CleanPostResponseArray(res.data.posts.data));
-          setIsLoading(false);
-        }
-      })
-      .catch((err) => console.log(err));
+      getPosts(client)
   }, []);
   const changePostCardExtendedState = (state: boolean) => {
     setpostCardExtendedIsVisible(state);
@@ -88,6 +92,7 @@ export default function Home() {
               jwt={jwt}
               closePostCardExtended={changePostCardExtendedState}
               user={userDetails}
+              refreshPosts = {getPosts}
             />
           )}
           {posts &&
