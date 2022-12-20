@@ -10,6 +10,9 @@ const nextConfig = {
         port: '1337',
       },
     ],
+  },
+  env:{
+    STRAPI_URL: process.env.STRAPI_URL
   }
 }
 

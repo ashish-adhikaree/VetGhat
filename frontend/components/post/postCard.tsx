@@ -6,35 +6,36 @@ import { AiOutlineSend, AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { Post } from "../../typedeclaration";
 import { GetTimeDifference } from "../../helper_functions/getTimeDifference";
 import ImageCarousel from "./imageCarousel";
+import Link from "next/link";
 const PostCard = ({ post }: { post: Post }) => {
-  const Base_URL = "http://localhost:1337";
   return (
     <div
-      className={`bg-white w-2/3 md:w-1/2 lg:w-1/3 grid grid-cols-7 p-3 gap-3 rounded-md ${
-        post.caption ? "grid-rows-postcardwithcaption" : "grid-rows-postcard"
-      }`}
+      className="bg-white w-full p-3 rounded-md space-y-5"
     >
-      <UserAvatar src={`${Base_URL + post.author.profilepic.url}`} />
-      <div className="col-span-6">
-        <p className="font-bold">{post.author.name}</p>
+      <div className="flex items-center space-x-5">
+      <UserAvatar src={process.env.STRAPI_URL + post.author.profilepic.url} />
+      <div className="">
+        <Link href={`/profile/${post.author.id}`} className="font-bold hover:underline">{post.author.username}</Link>
         <p className="text-gray-400">{GetTimeDifference(post.postedAt)}</p>
       </div>
-      {post.caption && <div className="col-span-7">{post.caption}</div>}
+      </div>
+      {post.caption && <div className="">{post.caption}</div>}
       {post.content.length > 1 ? (
         <ImageCarousel images={post.content} />
       ) : (
-        <div className="col-span-7 overflow-hidden h-[300px] w-full">
+        <div className="overflow-hidden h-[300px] w-full">
           <Image
             draggable="false"
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover  rounded-md"
             alt="post-image"
-            src={`${Base_URL + post.content[0].url}`}
+            src={process.env.STRAPI_URL + post.content[0].url}
             width={400}
             height={400}
+            priority = {true}
           />
         </div>
       )}
-      <div className="col-span-7 flex items-center justify-between border-y">
+      <div className="h-10 flex items-center justify-between border-y">
         <div className="postcard-icon-container">
           <AiOutlineHeart className="postcard-icon" />
           <span>{post.heartcount}</span>
@@ -48,7 +49,7 @@ const PostCard = ({ post }: { post: Post }) => {
           <span>{post.sharecount}</span>
         </div>
       </div>
-      <form className="col-span-7 bg-gray-50 rounded-md flex items-center px-3">
+      <form className="bg-gray-50 rounded-md flex items-center px-3 h-10">
         <input
           className="bg-transparent flex-grow outline-none"
           type="text"

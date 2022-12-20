@@ -7,8 +7,7 @@ export const SignUp = gql`
     ) {
       jwt
       user {
-        username
-        email
+        id
       }
     }
   }

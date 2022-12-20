@@ -5,7 +5,6 @@ import Image from 'next/image'
 import {AiFillLeftSquare, AiFillRightSquare} from 'react-icons/ai'
 
 const ImageCarousel = ({images}:{images: ImageType[]}) => {
-    const Base_URL = "http://localhost:1337"
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const handlePrevClick = () => {
@@ -31,11 +30,12 @@ const ImageCarousel = ({images}:{images: ImageType[]}) => {
       <div className='h-full w-full'>
         <Image
           draggable="false"
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover rounded-md"
           alt="post-image"
-          src={`${Base_URL + images[currentImageIndex].url}`}
+          src={process.env.STRAPI_URL + images[currentImageIndex].url}
           width={400}
           height={400}
+          priority = {true}
         />
       </div>
       <button className="absolute top-1/2 right-3 text-white text-2xl" onClick={handleNextClick}><AiFillRightSquare/></button>

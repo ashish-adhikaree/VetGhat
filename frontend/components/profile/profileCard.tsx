@@ -3,7 +3,6 @@ import { userAgent } from "next/server";
 import { useState } from "react";
 import { User } from "../../typedeclaration";
 const ProfileCard = ({ user, isUser }: { user: User; isUser: boolean }) => {
-  const Base_URL = "http://localhost:1337";
   const [hasFollowed, setHasFollowed] = useState<boolean>(false);
   const handleFollow = (e: any) => {
     e.preventDefault();
@@ -16,11 +15,12 @@ const ProfileCard = ({ user, isUser }: { user: User; isUser: boolean }) => {
         alt="profile-pic"
         width={150}
         height={150}
-        src={`${Base_URL + user.profilepic.url}`}
+        src={`${process.env.STRAPI_URL + user.profilepic.url}`}
+        priority = {true}
       />
       <div className="space-y-5 bg-white p-5 md:p-10 rounded-md">
         <div className="flex items-center space-x-5">
-          <p className="text-xl font-bold text-gray-700">{user.name}</p>
+          <p className="text-xl font-bold text-gray-700">{user.username}</p>
           <div className="w-[40px]">
             {!isUser && !hasFollowed && (
               <button

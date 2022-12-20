@@ -1,18 +1,22 @@
 import UserAvatar from "../reusables/userAvatar";
 import { GiCancel } from "react-icons/gi";
 import { HiOutlinePhotograph } from "react-icons/hi";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { createClient } from "../../apolloClient";
 import { createPost } from "../../lib/mutation";
 import { PostFormData } from "../../typedeclaration";
 import Image from "next/image";
+import { User } from "../../typedeclaration";
+import cookieCutter from "cookie-cutter"
 
 const CreatePostCardExtended = ({
   closePostCardExtended,
   jwt,
+  user
 }: {
   closePostCardExtended: any;
   jwt: string;
+  user: User
 }) => {
   const [formData, setFormData] = useState<PostFormData>({ isPublic: true });
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
@@ -77,9 +81,9 @@ const CreatePostCardExtended = ({
           </button>
         </div>
         <div className="flex space-x-5 items-center pl-3">
-          <UserAvatar src="/profile.png" />
+          <UserAvatar src={`${process.env.STRAPI_URL + user.profilepic.url}`} />
           <div>
-            <p className="font-bold">Ashish Adhikari</p>
+            <p className="font-bold">{user.username}</p>
             <select
               className="outline-none font-bold text-sm text-gray-500 bg-black bg-opacity-10 hover:shadow-sm cursor-pointer rounded-md px-3 py-1"
               name="isPublic"

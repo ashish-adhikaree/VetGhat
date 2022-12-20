@@ -23,7 +23,7 @@ const Profile = () => {
   const [userDetails, setUserDetails] = useState<User>({
     id: "default",
     profilepic: { url: "/" },
-    name: "default",
+    username: "default",
     followersCount: 0,
     followingCount: 0,
     posts: 0,
@@ -74,7 +74,7 @@ const Profile = () => {
     <Layout>
       <div className="flex flex-col items-center mx-auto space-y-20 mb-[100px] w-full md:w-[3/2] max-w-4xl">
         <Head>
-          <title>Profile-{userDetails.name}</title>
+          <title>Profile-{userDetails.username}</title>
           <meta name="description" content="Developed by Ashish" />
           <link rel="icon" href="/favicon.ico" />
         </Head>

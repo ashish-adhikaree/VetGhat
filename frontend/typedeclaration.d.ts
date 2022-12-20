@@ -4,7 +4,7 @@ export interface ImageType {
 
 export interface User {
     id: string,
-    name: string,
+    username: string,
     profilepic: ImageType,
     followersCount? :number,
     followingCount? : number,
@@ -26,7 +26,8 @@ export interface Post{
 
 export interface ProfilePost{
     id: string,
-    thumbnail:ImageType
+    thumbnail:ImageType,
+    multiImages: boolean,
     heartcount: number,
     commentcount: number,
 }

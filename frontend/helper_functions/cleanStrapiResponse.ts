@@ -5,7 +5,7 @@ export const CleanPostResponse = (post: any) => {
     id: post.id,
     author: {
       id: post.attributes.author.data.id,
-      name: post.attributes.author.data.attributes.username,
+      username: post.attributes.author.data.attributes.username,
       profilepic:post.attributes.author.data.attributes.profilepic.data !== null? {url:post.attributes.author.data.attributes.profilepic.data.attributes.url}:{url:"/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z"},
     },
     caption: post.attributes.caption,
@@ -35,6 +35,7 @@ export const CleanProfilePostResponse = (post:any) =>{
   const SinglePost: ProfilePost = {
     id: post.id,
     thumbnail: {url:post.attributes.content.data[0].attributes.url},
+    multiImages: post.attributes.content.data.length > 1? true: false,
     heartcount: post.attributes.heartcount,
     commentcount: post.attributes.commentcount,
   };
@@ -51,7 +52,7 @@ export const CleanProfilePostResponseArray = (posts:any) =>{
 export const CleanUserResponse = (user:any)=>{
   const temp: User = {
     id: user.id,
-    name:user.data.attributes.username,
+    username:user.data.attributes.username,
     profilepic:user.data.attributes.profilepic.data !== null ?{url:user.data.attributes.profilepic.data.attributes.url}:{url:"/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z"},
     followersCount: user.data.attributes.followersCount,
     followingCount: user.data.attributes.followingCount,
