@@ -13,6 +13,12 @@ export interface User {
     postsCount?: number
 }
 
+export interface Comment {
+    author : User,
+    body: string,
+    postedAt: string,
+}
+
 export interface Post{
     id: string,
     caption: string,
@@ -22,7 +28,7 @@ export interface Post{
     commentcount: number,
     sharecount: number,
     hearts:User[],
-    comments: User[],
+    comments: Comment[] | any[],
     postedAt: string,
 }
 

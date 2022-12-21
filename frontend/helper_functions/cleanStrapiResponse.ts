@@ -1,4 +1,5 @@
 import { Post, ProfilePost, User, UserDetails } from "../typedeclaration";
+import {GetTimeDifference} from "../helper_functions/getTimeDifference"
 
 export const CleanPostResponse = (post: any) => {
   const SinglePost: Post = {
@@ -18,7 +19,13 @@ export const CleanPostResponse = (post: any) => {
     sharecount: post.attributes.sharecount,
     commentcount: post.attributes.commentcount,
     hearts:[],
-    comments:[],
+    comments:post.attributes.comments && post.attributes.comments.data? post.attributes.comments.data.map((comment:any)=>(
+      {
+        author: CleanUserResponse(comment.attributes.author),
+        body: comment.attributes.body,
+        postedAt: GetTimeDifference(comment.attributes.createdAt)
+      }
+    )) : [],
     postedAt: post.attributes.createdAt,
   };
   return SinglePost;

@@ -42,23 +42,36 @@ export default function Home() {
 
   useEffect(() => {
     setjwt(cookieCutter.get("jwt"));
-    const jwt = cookieCutter.get("jwt")
+    const jwt = cookieCutter.get("jwt");
 
-    // Getting users 
-    Axios(jwt).get(`${process.env.STRAPI_URL}/api/users/me?populate[0]=profilepic&populate[1]=posts&populate[2]=posts.content`).then((res)=>{
-      console.log("user",res.data)
-      setUserDetails(CleanUserDetailsResponse(res.data))
-    }).catch((err)=> console.log(err))
+    // Getting users
+    Axios(jwt)
+      .get(`${process.env.STRAPI_URL}/api/users/me`, {
+        params: {
+          populate: ["profilepic", "post", "posts.content"],
+        },
+      })
+      .then((res) => {
+        console.log("user", res.data);
+        setUserDetails(CleanUserDetailsResponse(res.data));
+      })
+      .catch((err) => console.log(err));
 
-      // Getting posts 
-      Axios(jwt).get(`${process.env.STRAPI_URL}/api/posts?populate[author][populate][0]=profilepic&populate[content][populate][0]=data`).then((res)=>{
-        console.log("posts",res.data.data)
+    // Getting posts
+    Axios(jwt)
+      .get(`${process.env.STRAPI_URL}/api/posts`, {
+        params: {
+          populate: ["author.profilepic", "content"],
+        },
+      })
+      .then((res) => {
+        console.log("posts", res.data.data);
         if (res.data.data !== null) {
           setPosts(CleanPostResponseArray(res.data.data));
           setIsLoading(false);
         }
-      }).catch((err)=> console.log(err))
-
+      })
+      .catch((err) => console.log(err));
   }, []);
   const changePostCardExtendedState = (state: boolean) => {
     setpostCardExtendedIsVisible(state);

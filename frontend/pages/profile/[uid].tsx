@@ -1,4 +1,4 @@
-import { GetStaticProps, GetStaticPaths } from "next";
+
 import PostCardProfile from "../../components/profile/postCardProfile";
 import ProfileCard from "../../components/profile/profileCard";
 import cookieCutter from "cookie-cutter";
@@ -8,6 +8,7 @@ import Head from "next/head";
 import Loader from "../../components/profile/loader";
 import {
   CleanUserDetailsResponse,
+  // CleanUserResponse,
 } from "../../helper_functions/cleanStrapiResponse";
 import {UserDetails } from "../../typedeclaration";
 import Layout from "../../components/Layout/layout";
@@ -41,11 +42,22 @@ const Profile = () => {
       console.log("id", id);
       const jwt = cookieCutter.get("jwt");
       const uid = cookieCutter.get("uid");
-      if (id === uid) setIsUser(true);
+      if (id === uid) {
+        setIsUser(true)
+      };
 
       Axios(jwt)
         .get(
-          `${process.env.STRAPI_URL}/api/users/me?populate[0]=profilepic&populate[1]=posts&populate[2]=posts.content`
+          `${process.env.STRAPI_URL}/api/users/${id}`,
+          {
+            params:{
+              populate:[
+                "profilepic",
+                "posts",
+                "posts.content"
+              ]
+            }
+          }
         )
         .then((res) => {
           setUserDetails(CleanUserDetailsResponse(res.data));
@@ -87,3 +99,4 @@ const Profile = () => {
 };
 
 export default Profile;
+

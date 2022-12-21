@@ -3,10 +3,11 @@ import { BiComment } from "react-icons/bi";
 import { AiFillHeart } from "react-icons/ai";
 import { RiCheckboxMultipleBlankFill } from "react-icons/ri";
 import { ProfilePost } from "../../typedeclaration";
+import Link from "next/link";
 
 const PostCardProfile = ({ post }: { post: ProfilePost }) => {
   return (
-    <div className="group h-[275px] w-[250px] cursor-pointer relative rounded-md overflow-hidden m-5">
+    <Link as={`/post/${post.id}`} href={`/post/${post.id}`} className="group h-[275px] w-[250px] cursor-pointer relative rounded-md overflow-hidden m-5">
       {post.multiImages && (
         <div className="absolute top-2 right-2 text-xl text-white">
           <RiCheckboxMultipleBlankFill />
@@ -30,7 +31,7 @@ const PostCardProfile = ({ post }: { post: ProfilePost }) => {
         src={`${process.env.STRAPI_URL  + post.thumbnail.url}`}
         priority={true}
       />
-    </div>
+    </Link>
   );
 };
 export default PostCardProfile;

@@ -12,7 +12,7 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "users_permissions_user": {
+    "author": {
       "type": "relation",
       "relation": "manyToOne",
       "target": "plugin::users-permissions.user",
@@ -23,18 +23,6 @@
       "relation": "manyToOne",
       "target": "api::post.post",
       "inversedBy": "comments"
-    },
-    "parentComment": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::comment.comment",
-      "inversedBy": "replies"
-    },
-    "replies": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::comment.comment",
-      "mappedBy": "parentComment"
     },
     "body": {
       "type": "string"

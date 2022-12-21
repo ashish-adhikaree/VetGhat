@@ -1,58 +1,46 @@
-import { GetStaticProps, GetStaticPaths } from "next";
-import PostCardProfile from "../../components/profile/postCardProfile";
-import ProfileCard from "../../components/profile/profileCard";
 import cookieCutter from "cookie-cutter";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { createClient } from "../../apolloClient";
-import { GetProfile, GetProfilePosts } from "../../lib/query";
-import Head from "next/head";
 import Loader from "../../components/profile/loader";
-import {
-  CleanProfilePostResponseArray,
-  CleanUserDetailsResponse,
-  // CleanUserResponse,
-} from "../../helper_functions/cleanStrapiResponse";
-import { ProfilePost, User, UserDetails } from "../../typedeclaration";
+import { CleanPostResponse } from "../../helper_functions/cleanStrapiResponse";
+import { Post } from "../../typedeclaration";
 import Layout from "../../components/Layout/layout";
 import Axios from "../../axios";
+import Image from "next/image";
+import UserAvatar from "../../components/reusables/userAvatar";
+import Link from "next/link";
+import { GetTimeDifference } from "../../helper_functions/getTimeDifference";
+import ImageCarousel from "../../components/post/imageCarousel";
+import { AiOutlineSend } from "react-icons/ai";
+import Comment from "../../components/post/comment"
 
-const Profile = () => {
+const SinglePost = () => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [isUser, setIsUser] = useState<boolean>(false);
-  const [userDetails, setUserDetails] = useState<UserDetails>({
-    id: "default",
-    profilepic: { url: "/" },
-    username: "default",
-    bio: "",
-    followersCount: 0,
-    followingCount: 0,
-    postsCount: 0,
-    posts: [
-      {
-        id: "default",
-        thumbnail: { url: "/" },
-        multiImages: false,
-        heartcount: 0,
-        commentcount: 0,
-      },
-    ],
-  });
+  const [post, setPost] = useState<Post>();
   const router = useRouter();
   useEffect(() => {
-    if (router.query.uid) {
-      const id = router.query.uid;
-      console.log("id", id);
+    if (router.query.postid) {
+      const postid = router.query.postid;
       const jwt = cookieCutter.get("jwt");
-      const uid = cookieCutter.get("uid");
-      if (id === uid) setIsUser(true);
 
       Axios(jwt)
-        .get(
-          `${process.env.STRAPI_URL}/api/users/me?populate[0]=profilepic&populate[1]=posts&populate[2]=posts.content`
-        )
+        .get(`${process.env.STRAPI_URL}/api/posts/${postid}`, {
+          params: {
+            populate: [
+              "author",
+              "author.profilepic",
+              "content",
+              "hearts",
+              "hearts.profilepic",
+              "comments",
+              "comments.author",
+              "comments.author.profilepic",
+            ],
+          },
+        })
         .then((res) => {
-          setUserDetails(CleanUserDetailsResponse(res.data));
+          console.log(res);
+          setPost(CleanPostResponse(res.data.data));
           setLoading(false);
         })
         .catch((err) => console.log(err));
@@ -64,30 +52,63 @@ const Profile = () => {
   }
   return (
     <Layout>
-      <div className="flex flex-col items-center mx-auto space-y-20 mb-[100px] w-full md:w-[3/2] max-w-4xl">
-        <Head>
-          <title>Profile-{userDetails.username}</title>
-          <meta name="description" content="Developed by Ashish" />
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
-        <ProfileCard user={userDetails} isUser={isUser} />
-        {userDetails.posts &&
-          (userDetails.posts.length === 0 ? (
-            <p className="border-t border-gray-400 pt-5 w-full text-center font-bold text-xl text-gray-600">
-              No Posts
-            </p>
-          ) : (
-            <div
-              className={`w-full flex justify-center flex-wrap border-t border-gray-400 pt-5`}
-            >
-              {userDetails.posts.map((post) => (
-                <PostCardProfile key={post.id} post={post} />
-              ))}
+      {post && (
+        <div className="h-[80vh] flex bg-white m-5 space-x-5 ">
+          <div className="overflow-hidden h-full w-1/2 bg-black">
+            {post.content.length > 1 ? (
+              <ImageCarousel singlePost={true} images={post.content} />
+            ) : (
+              <Image
+                draggable="false"
+                className="h-full w-full object-contain"
+                alt="post-image"
+                src={process.env.STRAPI_URL + post.content[0].url}
+                width={800}
+                height={800}
+                priority={true}
+              />
+            )}
+          </div>
+          <div className="flex-grow relative">
+            <div className="p-5 space-y-5">
+              <div className="flex items-center space-x-5 flex-grow p-3 border-b">
+                <UserAvatar src={post.author.profilepic.url} />
+                <div className="">
+                  <Link
+                    href={`/profile/${post.author.id}`}
+                    className="font-bold hover:underline"
+                  >
+                    {post.author.username}
+                  </Link>
+                  <p className="text-gray-400">
+                    {GetTimeDifference(post.postedAt)}
+                  </p>
+                </div>
+              </div>
+              {post.caption && <div className="pl-5">{post.caption}</div>}
             </div>
-          ))}
-      </div>
+            {post.comments.length !== 0 ? (
+              post.comments.map((cmnt, index) => (
+                <Comment key={index} cmnt={cmnt} />
+              ))
+            ) : (
+              <div className="text-center p-20 text-gray-300 w-full">
+                No comments
+              </div>
+            )}
+            <form className="absolute bottom-0 left-0 right-0 flex items-center px-3 m-5 pt-5 h-10 border-t">
+              <input
+                className="bg-transparent flex-grow outline-none"
+                type="text"
+                placeholder="Write a Comment"
+              />
+              <AiOutlineSend className="text-2xl text-blue-400" />
+            </form>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };
 
-export default Profile;
+export default SinglePost;
