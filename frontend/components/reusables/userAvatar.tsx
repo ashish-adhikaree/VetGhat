@@ -5,7 +5,7 @@ const UserAvatar = ({ src }: { src: string }) => {
       className="rounded-full"
       draggable="false"
       alt=""
-      src={src}
+      src={process.env.STRAPI_URL+ src}
       width={50}
       height={50}
       priority = {true}

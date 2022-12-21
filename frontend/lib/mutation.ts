@@ -25,9 +25,9 @@ export const Login = gql`
 `;
 
 export const createPost = gql`
-  mutation createPost($isPublic: Boolean!, $authorid: ID!, $caption: String!, $content:[ID]!) {
+  mutation createPost($isPublic: Boolean!, $caption: String!, $content:[ID]!) {
     createPost(
-      data: { isPublic: $isPublic, author: $authorid, caption: $caption, content:$content}
+      data: { isPublic: $isPublic, caption: $caption, content:$content}
     ) {
       data {
         id

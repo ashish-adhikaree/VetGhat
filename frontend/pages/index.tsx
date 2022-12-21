@@ -2,12 +2,10 @@ import Head from "next/head";
 import CreatePostCardExtended from "../components/post/createPostCardExtended";
 import CreatePostCardMini from "../components/post/createPostCardMini";
 import PostCard from "../components/post/postCard";
-import { createClient } from "../apolloClient";
-import { GetPosts, GetProfile } from "../lib/query";
-import { Post, User } from "../typedeclaration";
+import { Post, UserDetails } from "../typedeclaration";
 import {
   CleanPostResponseArray,
-  CleanUserResponse,
+  CleanUserDetailsResponse,
 } from "../helper_functions/cleanStrapiResponse";
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout/layout";
@@ -15,7 +13,7 @@ import cookieCutter from "cookie-cutter";
 import Loader from "../components/post/loader";
 import LeftSidebar from "../components/leftsidebar/leftsidebar";
 import RightSidebar from "../components/rightsidebar/rightsidebar";
-import { ApolloClient, NormalizedCacheObject } from "@apollo/client";
+import Axios from "../axios";
 
 export default function Home() {
   const [posts, setPosts] = useState<Post[]>();
@@ -23,47 +21,44 @@ export default function Home() {
   const [jwt, setjwt] = useState("");
   const [postCardExtendedIsVisible, setpostCardExtendedIsVisible] =
     useState(false);
-  const [userDetails, setUserDetails] = useState<User>({
+  const [userDetails, setUserDetails] = useState<UserDetails>({
     id: "default",
     profilepic: { url: "/" },
     username: "default",
+    bio: "",
     followersCount: 0,
     followingCount: 0,
-    posts: 0,
+    postsCount: 0,
+    posts: [
+      {
+        id: "default",
+        thumbnail: { url: "/" },
+        multiImages: false,
+        heartcount: 0,
+        commentcount: 0,
+      },
+    ],
   });
-
-  const getPosts = (client:ApolloClient<NormalizedCacheObject>) =>{
-    client
-    .query({
-      query: GetPosts,
-    })
-    .then((res) => {
-      if (res.data.posts.data !== null) {
-        setPosts(CleanPostResponseArray(res.data.posts.data));
-        setIsLoading(false);
-      }
-    })
-    .catch((err) => console.log(err));
-  }
 
   useEffect(() => {
     setjwt(cookieCutter.get("jwt"));
-    const client = createClient(cookieCutter.get("jwt"));
-    // Getting profile info
-    client
-      .query({
-        query: GetProfile,
-        variables: {
-          id: cookieCutter.get("uid"),
-        },
-      })
-      .then((res) => {
-        if (res.data.usersPermissionsUser.data !== null) {
-          setUserDetails(CleanUserResponse(res.data.usersPermissionsUser));
+    const jwt = cookieCutter.get("jwt")
+
+    // Getting users 
+    Axios(jwt).get(`${process.env.STRAPI_URL}/api/users/me?populate[0]=profilepic&populate[1]=posts&populate[2]=posts.content`).then((res)=>{
+      console.log("user",res.data)
+      setUserDetails(CleanUserDetailsResponse(res.data))
+    }).catch((err)=> console.log(err))
+
+      // Getting posts 
+      Axios(jwt).get(`${process.env.STRAPI_URL}/api/posts?populate[author][populate][0]=profilepic&populate[content][populate][0]=data`).then((res)=>{
+        console.log("posts",res.data.data)
+        if (res.data.data !== null) {
+          setPosts(CleanPostResponseArray(res.data.data));
+          setIsLoading(false);
         }
-      })
-      .catch((err) => console.log(err));
-      getPosts(client)
+      }).catch((err)=> console.log(err))
+
   }, []);
   const changePostCardExtendedState = (state: boolean) => {
     setpostCardExtendedIsVisible(state);
@@ -92,7 +87,6 @@ export default function Home() {
               jwt={jwt}
               closePostCardExtended={changePostCardExtendedState}
               user={userDetails}
-              refreshPosts = {getPosts}
             />
           )}
           {posts &&

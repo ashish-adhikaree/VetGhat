@@ -1,4 +1,4 @@
-import { Post, ProfilePost, User } from "../typedeclaration";
+import { Post, ProfilePost, User, UserDetails } from "../typedeclaration";
 
 export const CleanPostResponse = (post: any) => {
   const SinglePost: Post = {
@@ -34,10 +34,10 @@ export const CleanPostResponseArray = (posts: any) => {
 export const CleanProfilePostResponse = (post:any) =>{
   const SinglePost: ProfilePost = {
     id: post.id,
-    thumbnail: {url:post.attributes.content.data[0].attributes.url},
-    multiImages: post.attributes.content.data.length > 1? true: false,
-    heartcount: post.attributes.heartcount,
-    commentcount: post.attributes.commentcount,
+    thumbnail: {url:post.content[0].url},
+    multiImages: post.content.length > 1? true: false,
+    heartcount: post.heartcount,
+    commentcount: post.commentcount,
   };
   return SinglePost;
 }
@@ -56,7 +56,21 @@ export const CleanUserResponse = (user:any)=>{
     profilepic:user.data.attributes.profilepic.data !== null ?{url:user.data.attributes.profilepic.data.attributes.url}:{url:"/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z"},
     followersCount: user.data.attributes.followersCount,
     followingCount: user.data.attributes.followingCount,
-    posts: user.data.attributes.posts  
+    postsCount: user.data.attributes.postsCount  
+  }
+  return temp
+}
+
+export const CleanUserDetailsResponse = (user:any) => {
+  const temp: UserDetails = {
+    id: user.id,
+    username: user.username,
+    bio: user.bio,
+    profilepic: user.profilepic === null?{url:"/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z"}:{url: user.profilepic.url},
+    followersCount: user.followersCount,
+    followingCount: user.followingCount,
+    postsCount: user.postsCount,
+    posts: CleanProfilePostResponseArray(user.posts)
   }
   return temp
 }

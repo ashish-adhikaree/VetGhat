@@ -1,8 +1,7 @@
 import Image from "next/image";
-import { userAgent } from "next/server";
 import { useState } from "react";
-import { User } from "../../typedeclaration";
-const ProfileCard = ({ user, isUser }: { user: User; isUser: boolean }) => {
+import { UserDetails } from "../../typedeclaration";
+const ProfileCard = ({ user, isUser }: { user: UserDetails; isUser: boolean }) => {
   const [hasFollowed, setHasFollowed] = useState<boolean>(false);
   const handleFollow = (e: any) => {
     e.preventDefault();
@@ -50,10 +49,11 @@ const ProfileCard = ({ user, isUser }: { user: User; isUser: boolean }) => {
             <p>Followings</p>
           </div>
           <div className="text-center">
-            <strong>{user.posts}</strong>
+            <strong>{user.postsCount}</strong>
             <p>Posts</p>
           </div>
         </div>
+        <p className="font-semibold">{user.bio}</p>
       </div>
     </div>
   );

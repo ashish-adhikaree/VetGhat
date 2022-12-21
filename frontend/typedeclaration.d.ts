@@ -1,3 +1,5 @@
+import { Blob } from "buffer"
+
 export interface ImageType {
     url : string,
 }
@@ -8,7 +10,7 @@ export interface User {
     profilepic: ImageType,
     followersCount? :number,
     followingCount? : number,
-    posts?: number
+    postsCount?: number
 }
 
 export interface Post{
@@ -32,6 +34,17 @@ export interface ProfilePost{
     commentcount: number,
 }
 
+export interface UserDetails{
+    id: string,
+    username: string,
+    bio: string,
+    profilepic: ImageType,
+    followersCount: number,
+    followingCount: number,
+    postsCount: number,
+    posts: ProfilePost[]
+}
+
 // Signup or Login Form
 export interface LoginValue {
     name?: String,
@@ -51,5 +64,5 @@ export interface AlertType{
 export interface PostFormData{
     isPublic?: boolean,
     caption?: string
-    files?: any[]
+    files: any[]
 }

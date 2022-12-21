@@ -8,21 +8,19 @@ import {
   AiOutlineEyeInvisible,
 } from "react-icons/ai";
 import { createClient } from "../../apolloClient";
+import Axios from "../../axios";
 import { SignUp } from "../../lib/mutation";
 import { AlertType, LoginValue } from "../../typedeclaration";
 import Alert from "../alert/alert";
 
-
-
-const SignupCard = ({ switchCards, setjwt, setuid}: any) => {
+const SignupCard = ({ switchCards, setjwt, setuid }: any) => {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
 
   const [formValue, setformValue] = useState<LoginValue>();
 
-  const [alert, setAlert] = useState<AlertType>()
+  const [alert, setAlert] = useState<AlertType>();
 
-  
-  const router = useRouter()
+  const router = useRouter();
 
   const changePasswordVisibility = (e: any) => {
     e.preventDefault();
@@ -30,50 +28,85 @@ const SignupCard = ({ switchCards, setjwt, setuid}: any) => {
   };
 
   const handleInputChange = (e: any) => {
-    const updatedFormValue = e.target.name ==="privacyCheck" ? {...formValue, [e.target.name]: e.target.checked }:{ ...formValue, [e.target.name]: e.target.value };
+    const updatedFormValue =
+      e.target.name === "privacyCheck"
+        ? { ...formValue, [e.target.name]: e.target.checked }
+        : { ...formValue, [e.target.name]: e.target.value };
     setformValue(updatedFormValue);
   };
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    if (formValue?.name && formValue?.email && formValue.password && formValue?.confirmPassword && formValue?.privacyCheck){
-      if (formValue.confirmPassword === formValue.password){
-        const client = createClient("")
-        client
-      .mutate({
-        mutation: SignUp,
-        variables:{
-          username: formValue?.name,
-          password: formValue?.password,
-          email: formValue?.email
-        }
-      })
-      .then((res) => {
-        setAlert({
-          type: "success",
-          body:"Account Created Successfully. Redirecting..."
-        })
-        setjwt(res.data?.register?.jwt)
-        setuid(res.data.register.user.id)
-        router.push('/')
-      })
-      .catch((error) => {
+    if (
+      formValue?.name &&
+      formValue?.email &&
+      formValue.password &&
+      formValue?.confirmPassword &&
+      formValue?.privacyCheck
+    ) {
+      if (formValue.confirmPassword === formValue.password) {
+        // Request API.
+
+        Axios("")
+          .post(`${process.env.STRAPI_URL}/api/auth/local/register`, {
+            username: formValue.name,
+            email: formValue.email,
+            password: formValue.password,
+          })
+          .then((res) => {
+            // Handle success.
+            setAlert({
+              type: "success",
+              body: "Account Created Successfully. Redirecting...",
+            });
+            setjwt(res.data.jwt);
+            setuid(res.data.user.id);
+            router.push("/");
+          })
+          .catch((error) => {
+            // Handle error.
+            setAlert({
+              type: "error",
+              body: error.message,
+            });
+          });
+
+        //   const client = createClient("")
+        //   client
+        // .mutate({
+        //   mutation: SignUp,
+        //   variables:{
+        //     username: formValue?.name,
+        //     password: formValue?.password,
+        //     email: formValue?.email
+        //   }
+        // })
+        // .then((res) => {
+        //   setAlert({
+        //     type: "success",
+        //     body:"Account Created Successfully. Redirecting..."
+        //   })
+        //   setjwt(res.data?.register?.jwt)
+        //   setuid(res.data.register.user.id)
+        //   router.push('/')
+        // })
+        // .catch((error) => {
+        //   setAlert({
+        //     type: "error",
+        //     body:error.message
+        //   })
+        // });
+      } else {
         setAlert({
           type: "error",
-          body:error.message
-        })
-      });
-      }else{
-        setAlert({
-          type: "error",
-          body:"Two Passwords Do Not Match"
-        })
+          body: "Two Passwords Do Not Match",
+        });
       }
-    }else{
+    } else {
       setAlert({
         type: "error",
-        body:"Fill up the form first"
-      })
+        body: "Fill up the form first",
+      });
     }
   };
 
@@ -84,8 +117,11 @@ const SignupCard = ({ switchCards, setjwt, setuid}: any) => {
           SignUp
         </p>
       </div>
-      {alert && <div className="px-8">
-        <Alert type={alert.type} body={alert.body}/></div>}
+      {alert && (
+        <div className="px-8">
+          <Alert type={alert.type} body={alert.body} />
+        </div>
+      )}
       <form
         onSubmit={handleSubmit}
         action="SignUp"
@@ -134,11 +170,16 @@ const SignupCard = ({ switchCards, setjwt, setuid}: any) => {
             type="password"
             placeholder="Confirm your password"
             className="authentication-input"
-            onChange = {handleInputChange}
+            onChange={handleInputChange}
           />
         </div>
         <div className="flex space-x-5 px-5 font-semibold pt-5">
-          <input type="checkbox" className="" name="privacyCheck" onChange={handleInputChange}/>
+          <input
+            type="checkbox"
+            className=""
+            name="privacyCheck"
+            onChange={handleInputChange}
+          />
           <p>I agree to all the terms and condition.</p>
         </div>
         <button

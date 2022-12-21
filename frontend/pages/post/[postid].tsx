@@ -4,12 +4,16 @@ import ProfileCard from "../../components/profile/profileCard";
 import cookieCutter from "cookie-cutter";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { createClient } from "../../apolloClient";
+import { GetProfile, GetProfilePosts } from "../../lib/query";
 import Head from "next/head";
 import Loader from "../../components/profile/loader";
 import {
+  CleanProfilePostResponseArray,
   CleanUserDetailsResponse,
+  // CleanUserResponse,
 } from "../../helper_functions/cleanStrapiResponse";
-import {UserDetails } from "../../typedeclaration";
+import { ProfilePost, User, UserDetails } from "../../typedeclaration";
 import Layout from "../../components/Layout/layout";
 import Axios from "../../axios";
 

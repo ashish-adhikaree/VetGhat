@@ -7,19 +7,18 @@ import {
   AiOutlineEyeInvisible,
 } from "react-icons/ai";
 
-import { createClient } from "../../apolloClient";
-import { Login } from "../../lib/mutation";
+import Axios from "../../axios";
 import { AlertType, LoginValue } from "../../typedeclaration";
 import Alert from "../alert/alert";
 
-const LoginCard = ({ switchCards , setjwt, setuid}: any) => {  
+const LoginCard = ({ switchCards, setjwt, setuid }: any) => {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
 
   const [formValue, setformValue] = useState<LoginValue>();
 
-  const [alert, setAlert] = useState<AlertType>()
+  const [alert, setAlert] = useState<AlertType>();
 
-  const router = useRouter()
+  const router = useRouter();
 
   const changePasswordVisibility = (e: any) => {
     e.preventDefault();
@@ -27,46 +26,48 @@ const LoginCard = ({ switchCards , setjwt, setuid}: any) => {
   };
 
   const handleInputChange = (e: any) => {
-    const updatedFormValue = e.target.name ==="privacyCheck" ? {...formValue, [e.target.name]: e.target.checked }:{ ...formValue, [e.target.name]: e.target.value };
+    const updatedFormValue =
+      e.target.name === "privacyCheck"
+        ? { ...formValue, [e.target.name]: e.target.checked }
+        : { ...formValue, [e.target.name]: e.target.value };
     setformValue(updatedFormValue);
   };
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    if (formValue?.email && formValue?.password && formValue?.privacyCheck){
+    if (formValue?.email && formValue?.password && formValue?.privacyCheck) {
       setAlert({
         type: "",
-        body: ""
-      })
-      const client = createClient("")
-      client
-      .mutate({
-        mutation: Login,
-        variables:{
-          email: formValue?.email,
-          password: formValue?.password,
-        }
-      })
-      .then((res) => {
-        setAlert({
-          type: "success",
-          body:"Logged in Successfully. Redirecting..."
-        })
-        setjwt(res.data?.login?.jwt)
-        setuid(res.data.login.user.id)
-        router.push('/')
-      })
-      .catch((error) => {
-        setAlert({
-          type: "error",
-          body:error.message
-        })
+        body: "",
       });
-    }else{
+      Axios("")
+        .post(`${process.env.STRAPI_URL}/api/auth/local`, {
+          identifier: formValue?.email,
+          password: formValue?.password,
+        })
+        .then((res) => {
+          // Handle success.
+          setAlert({
+            type: "success",
+            body: "Logged in Successfully. Redirecting...",
+          });
+          console.log(res.data)
+          setjwt(res.data.jwt);
+          setuid(res.data.user.id);
+          router.push("/");
+        })
+        .catch((error) => {
+          // Handle error.
+          setAlert({
+            type: "error",
+            body: error.message,
+          });
+        });
+    } else {
       setAlert({
         type: "error",
-        body:"Fill up the form first"
-      })
+        body: "Fill up the form first",
+      });
     }
   };
   return (
@@ -76,8 +77,11 @@ const LoginCard = ({ switchCards , setjwt, setuid}: any) => {
           LogIn
         </p>
       </div>
-      {alert && <div className="px-8">
-        <Alert type={alert.type} body={alert.body}/></div>}
+      {alert && (
+        <div className="px-8">
+          <Alert type={alert.type} body={alert.body} />
+        </div>
+      )}
       <form
         onSubmit={handleSubmit}
         action="Login"
@@ -110,7 +114,12 @@ const LoginCard = ({ switchCards , setjwt, setuid}: any) => {
           </button>
         </div>
         <div className="flex space-x-5 px-5 font-semibold pt-5">
-          <input type="checkbox" className="" name="privacyCheck" onChange={handleInputChange}/>
+          <input
+            type="checkbox"
+            className=""
+            name="privacyCheck"
+            onChange={handleInputChange}
+          />
           <p>I agree to all the terms and condition.</p>
         </div>
         <button

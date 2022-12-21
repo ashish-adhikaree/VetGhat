@@ -15,6 +15,7 @@
     "@strapi/plugin-i18n": "4.5.3",
     "@strapi/plugin-users-permissions": "4.5.3",
     "@strapi/strapi": "4.5.3",
+    "@strapi/utils": "^4.5.4",
     "better-sqlite3": "7.4.6"
   },
   "author": {

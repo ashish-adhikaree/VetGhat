@@ -13,7 +13,7 @@ const PostCard = ({ post }: { post: Post }) => {
       className="bg-white w-full p-3 rounded-md space-y-5"
     >
       <div className="flex items-center space-x-5">
-      <UserAvatar src={process.env.STRAPI_URL + post.author.profilepic.url} />
+      <UserAvatar src={post.author.profilepic.url} />
       <div className="">
         <Link href={`/profile/${post.author.id}`} className="font-bold hover:underline">{post.author.username}</Link>
         <p className="text-gray-400">{GetTimeDifference(post.postedAt)}</p>

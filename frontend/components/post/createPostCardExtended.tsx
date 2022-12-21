@@ -4,25 +4,27 @@ import { HiOutlinePhotograph } from "react-icons/hi";
 import React, { useState, useEffect } from "react";
 import { createClient } from "../../apolloClient";
 import { createPost, uploadContent } from "../../lib/mutation";
-import { PostFormData } from "../../typedeclaration";
+import { AlertType, PostFormData, UserDetails } from "../../typedeclaration";
 import Image from "next/image";
-import { User } from "../../typedeclaration";
-import cookieCutter from "cookie-cutter";
+import Axios from "../../axios";
+import Alert from "../alert/alert";
 
 const CreatePostCardExtended = ({
   closePostCardExtended,
   jwt,
   user,
-  refreshPosts
 }: {
   closePostCardExtended: any;
   jwt: string;
-  user: User;
-  refreshPosts: any
+  user: UserDetails;
 }) => {
-  const [formData, setFormData] = useState<PostFormData>({ isPublic: true });
+  const [formData, setFormData] = useState<PostFormData>({
+    isPublic: true,
+    files: []
+  });
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
-  // const imagesToUpload = useState(new FormData())
+
+  const [alert, setAlert] = useState<AlertType>();
 
   window.onscroll = () => {
     window.scrollTo(0, 0);
@@ -57,34 +59,33 @@ const CreatePostCardExtended = ({
 
   const handleSubmit = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
-    const client = createClient(jwt);
-    client
-      .mutate({
-        mutation: uploadContent,
-        variables: {
-          files: formData.files,
-        },
-      })
-      .then((res) => {
-        console.log(res)
-        client
-      .mutate({
-        mutation: createPost,
-        variables: {
-          isPublic: formData.isPublic,
-          authorid: user.id,
-          caption: formData.caption ? formData.caption : "",
-          content: res.data.multipleUpload.map((file:any)=>file.data.id)
-        },
-      })
-      .then((res) => {})
-      .catch((err) => console.log(err));
-      })
-      .catch((err) => console.log(err));
-    
-    refreshPosts(client)
-    closePostCardExtended(false);
-    window.onscroll = () => {};
+    setAlert({
+      type: "",
+      body: "",
+    });
+    if (formData.files.length !== 0){
+      const data = {
+        isPublic: formData.isPublic,
+        caption: formData.caption,
+      };
+      const form = new FormData();
+      for (let i=0; i<formData.files?.length; i++){
+        form.append("files.content", formData.files[i])
+      }
+      form.append("data", JSON.stringify(data));
+  
+      Axios(jwt)
+        .post(`${process.env.STRAPI_URL}/api/posts`, form)
+        .then((res) => console.log(res))
+        .catch((err) => console.log(err));
+      closePostCardExtended(false);
+      window.onscroll = () => {};
+    }else{
+      setAlert({
+        type: "error",
+        body: "No images selected",
+      });
+    }
   };
 
   return (
@@ -96,8 +97,10 @@ const CreatePostCardExtended = ({
             <GiCancel className="text-gray-400 hover:text-gray-700 " />
           </button>
         </div>
+        {alert &&
+            <Alert type={alert.type} body={alert.body}/>}
         <div className="flex space-x-5 items-center pl-3">
-          <UserAvatar src={`${process.env.STRAPI_URL + user.profilepic.url}`} />
+          <UserAvatar src={user.profilepic.url} />
           <div>
             <p className="font-bold">{user.username}</p>
             <select

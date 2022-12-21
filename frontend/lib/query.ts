@@ -55,7 +55,7 @@ query GetProfile($id: ID!){
       }
       followersCount
       followingCount
-      posts
+      postsCount
     }
   }
   }
