@@ -74,14 +74,6 @@
     "bio": {
       "type": "string"
     },
-    "followersCount": {
-      "type": "integer",
-      "default": 0
-    },
-    "followingCount": {
-      "type": "integer",
-      "default": 0
-    },
     "followers": {
       "type": "relation",
       "relation": "manyToMany",
@@ -94,10 +86,6 @@
       "target": "plugin::users-permissions.user",
       "inversedBy": "followers"
     },
-    "postsCount": {
-      "type": "integer",
-      "default": 0
-    },
     "posts": {
       "type": "relation",
       "relation": "oneToMany",
@@ -109,6 +97,12 @@
       "relation": "oneToMany",
       "target": "api::comment.comment",
       "mappedBy": "author"
+    },
+    "likedPosts": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::post.post",
+      "mappedBy": "hearts"
     }
   }
 }

@@ -1,7 +1,6 @@
 import cookieCutter from "cookie-cutter";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import Loader from "../../components/profile/loader";
 import { CleanPostResponse } from "../../helper_functions/cleanStrapiResponse";
 import { Post } from "../../typedeclaration";
 import Layout from "../../components/Layout/layout";
@@ -12,7 +11,9 @@ import Link from "next/link";
 import { GetTimeDifference } from "../../helper_functions/getTimeDifference";
 import ImageCarousel from "../../components/post/imageCarousel";
 import { AiOutlineSend } from "react-icons/ai";
-import Comment from "../../components/post/comment"
+import Comment from "../../components/post/comment";
+import Head from "next/head";
+import SinglePostLoader from "../../components/post/singlePostLoader";
 
 const SinglePost = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -48,12 +49,17 @@ const SinglePost = () => {
   }, [router]);
 
   if (loading) {
-    return <Loader />;
+    return <SinglePostLoader />;
   }
   return (
     <Layout>
       {post && (
         <div className="h-[80vh] flex bg-white m-5 space-x-5 ">
+          <Head>
+            <title>Post-{post.author.username}</title>
+            <meta name="description" content="Developed by Ashish" />
+            <link rel="icon" href="/favicon.ico" />
+          </Head>
           <div className="overflow-hidden h-full w-1/2 bg-black">
             {post.content.length > 1 ? (
               <ImageCarousel singlePost={true} images={post.content} />
@@ -80,12 +86,28 @@ const SinglePost = () => {
                   >
                     {post.author.username}
                   </Link>
-                  <p className="text-gray-400">
-                    {GetTimeDifference(post.postedAt)}
-                  </p>
                 </div>
               </div>
-              {post.caption && <div className="pl-5">{post.caption}</div>}
+              {post.caption && (
+                <div className="px-5 flex items-center space-x-3">
+                  <Image
+                    className="rounded-full"
+                    width={40}
+                    height={40}
+                    alt={`${post.author.username}-profilepic`}
+                    src={process.env.STRAPI_URL + post.author.profilepic.url}
+                  />
+                  <div>
+                    <span className="font-semibold pr-3">
+                      {post.author.username}
+                    </span>
+                    <span>{post.caption}</span>
+                    <p className="text-gray-400 text-sm">
+                      {GetTimeDifference(post.postedAt)}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
             {post.comments.length !== 0 ? (
               post.comments.map((cmnt, index) => (

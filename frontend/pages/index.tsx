@@ -41,14 +41,40 @@ export default function Home() {
   });
 
   useEffect(() => {
-    setjwt(cookieCutter.get("jwt"));
     const jwt = cookieCutter.get("jwt");
 
+    const { io } = require("socket.io-client");
+
+    // token will be verified, connection will be rejected if not a valid JWT
+    const socket = io(
+      process.env.STRAPI_URL,
+      {
+        auth: {
+          token: jwt,
+        },
+      }
+    );
+
+    //  wait until socket connects before adding event listeners
+    socket.on("connect", () => {
+      console.log("connected")
+      socket.on("post:create", () => {
+        getPosts()
+      });
+    });
+
+    setjwt(cookieCutter.get("jwt"));
     // Getting users
     Axios(jwt)
       .get(`${process.env.STRAPI_URL}/api/users/me`, {
         params: {
-          populate: ["profilepic", "post", "posts.content"],
+          populate: [
+            "profilepic",
+            "posts",
+            "posts.content",
+            "followers",
+            "followings",
+          ],
         },
       })
       .then((res) => {
@@ -58,20 +84,32 @@ export default function Home() {
       .catch((err) => console.log(err));
 
     // Getting posts
-    Axios(jwt)
-      .get(`${process.env.STRAPI_URL}/api/posts`, {
-        params: {
-          populate: ["author.profilepic", "content"],
-        },
-      })
-      .then((res) => {
-        console.log("posts", res.data.data);
-        if (res.data.data !== null) {
-          setPosts(CleanPostResponseArray(res.data.data));
-          setIsLoading(false);
-        }
-      })
-      .catch((err) => console.log(err));
+      const getPosts = () => {
+        Axios(jwt)
+        .get(`${process.env.STRAPI_URL}/api/posts`, {
+          params: {
+            populate: [
+              "author.profilepic",
+              "author.posts",
+              "content",
+              "comments",
+              "comments.author",
+              "comments.author.profilepic",
+              "hearts",
+            ],
+            sort: "createdAt:desc",
+          },
+        })
+        .then((res) => {
+          console.log("posts", res.data.data);
+          if (res.data.data !== null) {
+            setPosts(CleanPostResponseArray(res.data.data));
+            setIsLoading(false);
+          }
+        })
+        .catch((err) => console.log(err));
+      }
+      getPosts()
   }, []);
   const changePostCardExtendedState = (state: boolean) => {
     setpostCardExtendedIsVisible(state);

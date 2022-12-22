@@ -31,22 +31,11 @@
         "audios"
       ]
     },
-    "heartcount": {
-      "type": "integer",
-      "default": 0
-    },
-    "commentcount": {
-      "type": "integer",
-      "default": 0
-    },
-    "sharecount": {
-      "type": "integer",
-      "default": 0
-    },
     "hearts": {
       "type": "relation",
-      "relation": "oneToMany",
-      "target": "plugin::users-permissions.user"
+      "relation": "manyToMany",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "likedPosts"
     },
     "author": {
       "type": "relation",

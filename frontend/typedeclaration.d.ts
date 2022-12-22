@@ -26,7 +26,6 @@ export interface Post{
     content:ImageType[]
     heartcount: number,
     commentcount: number,
-    sharecount: number,
     hearts:User[],
     comments: Comment[] | any[],
     postedAt: string,

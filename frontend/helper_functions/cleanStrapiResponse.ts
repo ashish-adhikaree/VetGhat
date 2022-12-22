@@ -15,11 +15,10 @@ export const CleanPostResponse = (post: any) => {
         url: image.attributes.url
       }
     }),
-    heartcount: post.attributes.heartcount,
-    sharecount: post.attributes.sharecount,
-    commentcount: post.attributes.commentcount,
+    heartcount: post.attributes.hearts.data.length,
+    commentcount: post.attributes.comments.data.length,
     hearts:[],
-    comments:post.attributes.comments && post.attributes.comments.data? post.attributes.comments.data.map((comment:any)=>(
+    comments:(post.attributes.comments && post.attributes.comments.data.length > 0)? post.attributes.comments.data.map((comment:any)=>(
       {
         author: CleanUserResponse(comment.attributes.author),
         body: comment.attributes.body,
@@ -61,9 +60,9 @@ export const CleanUserResponse = (user:any)=>{
     id: user.data.id,
     username:user.data.attributes.username,
     profilepic:user.data.attributes.profilepic.data !== null ?{url:user.data.attributes.profilepic.data.attributes.url}:{url:"/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z"},
-    followersCount: user.data.attributes.followersCount,
-    followingCount: user.data.attributes.followingCount,
-    postsCount: user.data.attributes.postsCount  
+    followersCount: user.data.attributes.followers && user.data.attributes.followers.data.length,
+    followingCount: user.data.attributes.followings && user.data.attributes.followings.data.length,
+    postsCount: user.data.attributes.posts && user.data.attributes.posts.data.length
   }
   return temp
 }
@@ -74,9 +73,9 @@ export const CleanUserDetailsResponse = (user:any) => {
     username: user.username,
     bio: user.bio,
     profilepic: user.profilepic === null?{url:"/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z"}:{url: user.profilepic.url},
-    followersCount: user.followersCount,
-    followingCount: user.followingCount,
-    postsCount: user.postsCount,
+    followersCount: user.followers.length,
+    followingCount: user.followings.length,
+    postsCount: user.posts.length,
     posts: CleanProfilePostResponseArray(user.posts)
   }
   return temp

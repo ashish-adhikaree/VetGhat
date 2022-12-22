@@ -54,7 +54,11 @@ const Profile = () => {
               populate:[
                 "profilepic",
                 "posts",
-                "posts.content"
+                "posts.content",
+                "followers",
+                "followers.profilepic",
+                "followings",
+                "followings.profilepic"
               ]
             }
           }

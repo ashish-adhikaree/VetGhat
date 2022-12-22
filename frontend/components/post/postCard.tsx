@@ -7,10 +7,40 @@ import { Post } from "../../typedeclaration";
 import { GetTimeDifference } from "../../helper_functions/getTimeDifference";
 import ImageCarousel from "./imageCarousel";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import cookieCutter from "cookie-cutter";
+import Axios from "../../axios";
 const PostCard = ({ post }: { post: Post }) => {
+  const comment = useRef<HTMLInputElement>(null);
+  const [jwt, setjwt] = useState("");
+  useEffect(() => {
+    const jwt = cookieCutter.get("jwt");
+    setjwt(jwt);
+  }, []);
+  const handleComment = (e: any) => {
+    e.preventDefault();
+    if (comment.current) {
+      console.log(comment.current.value);
+      if (comment.current.value !== "") {
+        Axios(jwt)
+          .post(`${process.env.STRAPI_URL}/api/comments`, {
+            data: {
+              post: post.id.toString(),
+              body: comment.current.value,
+            },
+          })
+          .then((res) => {
+            if (comment.current?.value){
+              comment.current.value = ''
+            }
+          })
+          .catch((err) => console.log(err));
+      }
+    }
+  };
   return (
-    <div className="bg-white w-full p-3 rounded-md space-y-5">
-      <div className="flex items-center space-x-5">
+    <div className="bg-white w-full space-y-3">
+      <div className="flex items-center space-x-5 p-5">
         <UserAvatar src={post.author.profilepic.url} />
         <div className="">
           <Link
@@ -19,24 +49,16 @@ const PostCard = ({ post }: { post: Post }) => {
           >
             {post.author.username}
           </Link>
-          <p className="text-gray-400">{GetTimeDifference(post.postedAt)}</p>
         </div>
       </div>
-      {post.caption && <div className="">{post.caption}</div>}
       {post.content.length > 1 ? (
-        <Link
-          as={`/post/${post.id}`}
-          href={`/post/${post.id}`}
-          className="h-[300px]"
-        >
-          <ImageCarousel link={`/post/${post.id}`} images={post.content} />
-        </Link>
+        <ImageCarousel link={`/post/${post.id}`} images={post.content} />
       ) : (
         <Link as={`/post/${post.id}`} href={`/post/${post.id}`}>
-          <div className="overflow-hidden h-[300px] w-full pt-5">
+          <div className="overflow-hidden h-[300px] w-full">
             <Image
               draggable="false"
-              className="h-full w-full object-cover  rounded-md"
+              className="h-full w-full object-cover"
               alt="post-image"
               src={process.env.STRAPI_URL + post.content[0].url}
               width={400}
@@ -46,27 +68,50 @@ const PostCard = ({ post }: { post: Post }) => {
           </div>
         </Link>
       )}
-      <div className="h-10 flex items-center justify-between border-y">
+      <div className="h-10 flex items-center space-x-4 px-5">
         <div className="postcard-icon-container">
           <AiOutlineHeart className="postcard-icon" />
-          <span>{post.heartcount}</span>
         </div>
         <div className="postcard-icon-container">
           <BiComment className="postcard-icon" />
-          <span>{post.commentcount}</span>
         </div>
         <div className="postcard-icon-container">
           <RiShareForwardLine className="postcard-icon" />
-          <span>{post.sharecount}</span>
         </div>
       </div>
-      <form className="bg-gray-50 rounded-md flex items-center px-3 h-10">
+      {post.heartcount > 0 && (
+        <div className="px-5">
+          {" "}
+          Loved by you and {post.heartcount - 1} others
+        </div>
+      )}
+      {post.caption && (
+        <div className="px-5 space-x-3 w-full truncate">
+          <span className="font-bold">{post.author.username}</span>
+          <span>{post.caption}</span>
+        </div>
+      )}
+      {post.commentcount > 0 && (
+        <div className="px-5 text-gray-400">
+          {" "}
+          View all {post.commentcount} comments
+        </div>
+      )}
+      <p className="text-gray-400 px-5 uppercase text-sm">
+        {GetTimeDifference(post.postedAt)}
+      </p>
+      <form className="flex items-center px-5 border-t py-5">
         <input
+          ref={comment}
           className="bg-transparent flex-grow outline-none"
           type="text"
-          placeholder="Write a Comment"
+          placeholder="Write a Comment..."
         />
-        <AiOutlineSend className="text-2xl text-gray-400" />
+        <button className="hidden" onClick={handleComment}></button>
+        <AiOutlineSend
+          className="text-2xl text-blue-300"
+          onClick={handleComment}
+        />
       </form>
     </div>
   );
