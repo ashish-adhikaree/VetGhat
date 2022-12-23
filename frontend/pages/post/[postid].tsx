@@ -1,5 +1,5 @@
 import cookieCutter from "cookie-cutter";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { CleanPostResponse } from "../../helper_functions/cleanStrapiResponse";
 import { Post } from "../../typedeclaration";
@@ -18,11 +18,16 @@ import SinglePostLoader from "../../components/post/singlePostLoader";
 const SinglePost = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [post, setPost] = useState<Post>();
+  const [jwt, setjwt] = useState("");
+  const comment = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
   useEffect(() => {
     if (router.query.postid) {
       const postid = router.query.postid;
+
       const jwt = cookieCutter.get("jwt");
+      setjwt(jwt);
 
       Axios(jwt)
         .get(`${process.env.STRAPI_URL}/api/posts/${postid}`, {
@@ -47,6 +52,28 @@ const SinglePost = () => {
         .catch((err) => console.log(err));
     }
   }, [router]);
+
+  const handleComment = (e: any) => {
+    e.preventDefault();
+    if (comment.current) {
+      console.log(comment.current.value);
+      if (comment.current.value !== "") {
+        Axios(jwt)
+          .post(`${process.env.STRAPI_URL}/api/comments`, {
+            data: {
+              post: post ? post.id.toString() : "",
+              body: comment.current.value,
+            },
+          })
+          .then((res) => {
+            if (comment.current?.value) {
+              comment.current.value = "";
+            }
+          })
+          .catch((err) => console.log(err));
+      }
+    }
+  };
 
   if (loading) {
     return <SinglePostLoader />;
@@ -75,7 +102,7 @@ const SinglePost = () => {
               />
             )}
           </div>
-          <div className="flex-grow relative">
+          <div className="flex-grow relative flex flex-col">
             <div className="p-5 space-y-5">
               <div className="flex items-center space-x-5 flex-grow p-3 border-b">
                 <UserAvatar src={post.author.profilepic.url} />
@@ -109,22 +136,29 @@ const SinglePost = () => {
                 </div>
               )}
             </div>
-            {post.comments.length !== 0 ? (
-              post.comments.map((cmnt, index) => (
-                <Comment key={index} cmnt={cmnt} />
-              ))
-            ) : (
-              <div className="text-center p-20 text-gray-300 w-full">
-                No comments
-              </div>
-            )}
-            <form className="absolute bottom-0 left-0 right-0 flex items-center px-3 m-5 pt-5 h-10 border-t">
+            <div className="flex-grow overflow-y-scroll pb-10 scrollbar-none">
+              {post.comments.length !== 0 ? (
+                post.comments.map((cmnt, index) => (
+                  <Comment key={index} cmnt={cmnt} />
+                ))
+              ) : (
+                <div className="text-center p-20 text-gray-300 w-full">
+                  No comments
+                </div>
+              )}
+            </div>
+            <form className="absolute bottom-0 left-0 right-0 flex items-center px-3 h-[4rem] border-t bg-white">
               <input
+                ref={comment}
                 className="bg-transparent flex-grow outline-none"
                 type="text"
                 placeholder="Write a Comment"
               />
-              <AiOutlineSend className="text-2xl text-blue-400" />
+              <button onClick={handleComment} className="hidden"></button>
+              <AiOutlineSend
+                className="text-2xl text-blue-400"
+                onClick={handleComment}
+              />
             </form>
           </div>
         </div>

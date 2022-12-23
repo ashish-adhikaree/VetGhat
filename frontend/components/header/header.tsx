@@ -8,7 +8,7 @@ const Header = () => {
     setuid(cookieCutter.get("uid"));
   }, []);
   return (
-    <div className="w-full bg-white p-5 sticky top-0 shadow-sm flex items-center justify-between z-[100]">
+    <div className="w-full bg-white p-5 sticky top-0 shadow-sm flex items-center justify-between z-[200]">
       <Link href="/">Logo</Link>
       <div>SearchBox</div>
       <div>

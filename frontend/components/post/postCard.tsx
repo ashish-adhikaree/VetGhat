@@ -1,7 +1,6 @@
 import UserAvatar from "../reusables/userAvatar";
 import Image from "next/image";
 import { BiComment } from "react-icons/bi";
-import { RiShareForwardLine } from "react-icons/ri";
 import { AiOutlineSend, AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { Post } from "../../typedeclaration";
 import { GetTimeDifference } from "../../helper_functions/getTimeDifference";
@@ -10,13 +9,31 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import cookieCutter from "cookie-cutter";
 import Axios from "../../axios";
+import CommentCard from "./commentCard";
+import HeartCard from "./heartCard";
+import { userAgent } from "next/server";
 const PostCard = ({ post }: { post: Post }) => {
   const comment = useRef<HTMLInputElement>(null);
   const [jwt, setjwt] = useState("");
+  const [uid, setuid] = useState("");
+  const [showComments, setShowComments] = useState(false);
+  const [showHearts, setShowHearts] = useState(false);
+  const [loved, setLoved] = useState(false);
+
   useEffect(() => {
     const jwt = cookieCutter.get("jwt");
     setjwt(jwt);
+    setuid(cookieCutter.get("uid"));
+    if (post.hearts.length !== 0) {
+      post.hearts.map((user) => {
+        if (user.id.toString() === cookieCutter.get("uid")) {
+          console.log("is equal");
+          setLoved(true);
+        }
+      });
+    }
   }, []);
+
   const handleComment = (e: any) => {
     e.preventDefault();
     if (comment.current) {
@@ -30,8 +47,8 @@ const PostCard = ({ post }: { post: Post }) => {
             },
           })
           .then((res) => {
-            if (comment.current?.value){
-              comment.current.value = ''
+            if (comment.current?.value) {
+              comment.current.value = "";
             }
           })
           .catch((err) => console.log(err));
@@ -39,11 +56,21 @@ const PostCard = ({ post }: { post: Post }) => {
     }
   };
   return (
-    <div className="bg-white w-full space-y-3">
+    <div className="bg-white w-full space-y-3 relative">
+      {showComments && (
+        <CommentCard
+          showCommentCard={setShowComments}
+          comments={post.comments}
+        />
+      )}
+      {showHearts && (
+        <HeartCard showHeartCard={setShowHearts} uid={uid} hearts={post.hearts} />
+      )}
       <div className="flex items-center space-x-5 p-5">
         <UserAvatar src={post.author.profilepic.url} />
         <div className="">
           <Link
+            as={`/profile/${post.author.id}`}
             href={`/profile/${post.author.id}`}
             className="font-bold hover:underline"
           >
@@ -70,19 +97,40 @@ const PostCard = ({ post }: { post: Post }) => {
       )}
       <div className="h-10 flex items-center space-x-4 px-5">
         <div className="postcard-icon-container">
-          <AiOutlineHeart className="postcard-icon" />
+          {loved ? (
+            <AiFillHeart className="postcard-icon text-red-500" />
+          ) : (
+            <AiOutlineHeart className="postcard-icon" />
+          )}
         </div>
         <div className="postcard-icon-container">
           <BiComment className="postcard-icon" />
         </div>
-        <div className="postcard-icon-container">
-          <RiShareForwardLine className="postcard-icon" />
-        </div>
       </div>
       {post.heartcount > 0 && (
-        <div className="px-5">
-          {" "}
-          Loved by you and {post.heartcount - 1} others
+        <div
+          className="px-5 cursor-pointer hover:underline"
+          onClick={() => {
+            setShowHearts(true);
+          }}
+        >
+          {`Loved by ${
+            loved ? (post.hearts.length > 1 ? "you," : "you") : ""
+          } ${
+            post.hearts[0].id.toString() === uid
+              ? post.hearts.length > 1
+                ? post.hearts[1].username
+                : ""
+              : post.hearts[0].username
+          } ${
+            loved
+              ? post.hearts.length > 2
+                ? `and ${post.hearts.length - 2 === 1? "1 other" : `${post.hearts.length - 2} others`}`
+                : ""
+              : post.hearts.length > 1
+              ? `and ${post.hearts.length - 1 == 1 ? "1 other" : `${post.hearts.length - 1} others`}`
+              : ""
+          }`}
         </div>
       )}
       {post.caption && (
@@ -92,9 +140,13 @@ const PostCard = ({ post }: { post: Post }) => {
         </div>
       )}
       {post.commentcount > 0 && (
-        <div className="px-5 text-gray-400">
-          {" "}
-          View all {post.commentcount} comments
+        <div
+          onClick={() => {
+            setShowComments(true);
+          }}
+          className="px-5 text-gray-400 cursor-pointer hover:underline"
+        >
+          View {post.commentcount === 1 ? "1 comment" : `all ${post.commentcount} comments`}
         </div>
       )}
       <p className="text-gray-400 px-5 uppercase text-sm">

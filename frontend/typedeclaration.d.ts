@@ -5,7 +5,7 @@ export interface ImageType {
 }
 
 export interface User {
-    id: string,
+    id: number,
     username: string,
     profilepic: ImageType,
     followersCount? :number,
@@ -20,7 +20,7 @@ export interface Comment {
 }
 
 export interface Post{
-    id: string,
+    id: number,
     caption: string,
     author:User,
     content:ImageType[]
@@ -32,7 +32,7 @@ export interface Post{
 }
 
 export interface ProfilePost{
-    id: string,
+    id: number,
     thumbnail:ImageType,
     multiImages: boolean,
     heartcount: number,
@@ -40,7 +40,7 @@ export interface ProfilePost{
 }
 
 export interface UserDetails{
-    id: string,
+    id: number,
     username: string,
     bio: string,
     profilepic: ImageType,
