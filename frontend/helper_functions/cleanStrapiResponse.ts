@@ -63,8 +63,8 @@ export const CleanProfilePostResponse = (post: any) => {
     id: post.id,
     thumbnail: { url: post.content[0].url },
     multiImages: post.content.length > 1 ? true : false,
-    heartcount: post.heartcount,
-    commentcount: post.commentcount,
+    heartcount: post.hearts.length,
+    commentcount: post.comments.length,
   };
   return SinglePost;
 };

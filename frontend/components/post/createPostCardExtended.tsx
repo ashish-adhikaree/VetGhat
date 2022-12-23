@@ -1,30 +1,27 @@
 import UserAvatar from "../reusables/userAvatar";
 import { GiCancel } from "react-icons/gi";
 import { HiOutlinePhotograph } from "react-icons/hi";
-import React, { useState, useEffect } from "react";
-import { createClient } from "../../apolloClient";
-import { createPost, uploadContent } from "../../lib/mutation";
-import { AlertType, PostFormData, UserDetails } from "../../typedeclaration";
+import React, { useState } from "react";
+import {PostFormData, UserDetails } from "../../typedeclaration";
 import Image from "next/image";
 import Axios from "../../axios";
-import Alert from "../alert/alert";
 
 const CreatePostCardExtended = ({
   closePostCardExtended,
   jwt,
   user,
+  setAlert
 }: {
   closePostCardExtended: any;
   jwt: string;
   user: UserDetails;
+  setAlert: any
 }) => {
   const [formData, setFormData] = useState<PostFormData>({
     isPublic: true,
     files: []
   });
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
-
-  const [alert, setAlert] = useState<AlertType>();
 
   window.onscroll = () => {
     window.scrollTo(0, 0);
@@ -59,10 +56,6 @@ const CreatePostCardExtended = ({
 
   const handleSubmit = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
-    setAlert({
-      type: "",
-      body: "",
-    });
     if (formData.files.length !== 0){
       const data = {
         isPublic: formData.isPublic,
@@ -76,7 +69,15 @@ const CreatePostCardExtended = ({
   
       Axios(jwt)
         .post(`${process.env.STRAPI_URL}/api/posts`, form)
-        .then((res) => console.log(res))
+        .then((res) => {
+          setAlert({
+            type: "success",
+            body: "Post Created Successfully",
+          });
+          setInterval(() => {
+            setAlert(undefined);
+          }, 3000);
+        })
         .catch((err) => console.log(err));
       closePostCardExtended(false);
       window.onscroll = () => {};
@@ -85,6 +86,9 @@ const CreatePostCardExtended = ({
         type: "error",
         body: "No images selected",
       });
+      setInterval(() => {
+        setAlert(undefined);
+      }, 3000);
     }
   };
 
@@ -97,8 +101,6 @@ const CreatePostCardExtended = ({
             <GiCancel className="text-gray-400 hover:text-gray-700 " />
           </button>
         </div>
-        {alert &&
-            <Alert type={alert.type} body={alert.body}/>}
         <div className="flex space-x-5 items-center pl-3">
           <UserAvatar src={user.profilepic.url} />
           <div>

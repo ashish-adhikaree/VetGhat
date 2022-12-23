@@ -3,8 +3,8 @@ import { Comment } from "../../typedeclaration"
 import UserAvatar from "../reusables/userAvatar"
 
 const Comment = ({cmnt}:{cmnt: Comment}) => {
-    return <div className="flex-grow p-5 pl-10">
-    <div className=" flex space-x-3">
+    return <div className="flex-grow p-5 pl-10 items-center">
+    <div className=" flex space-x-3 items-center">
       <UserAvatar src={cmnt.author.profilepic.url}/>
       <div>
       <Link href={`/profile/${cmnt.author.id}`} className="font-semibold mr-2 hover:underline">{cmnt.author.username}</Link>

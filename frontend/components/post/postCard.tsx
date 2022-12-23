@@ -11,15 +11,15 @@ import cookieCutter from "cookie-cutter";
 import Axios from "../../axios";
 import CommentCard from "./commentCard";
 import HeartCard from "./heartCard";
-import { userAgent } from "next/server";
-const PostCard = ({ post }: { post: Post }) => {
+import { useRouter } from "next/router";
+const PostCard = ({ post, setAlert }: { post: Post, setAlert: any}) => {
   const comment = useRef<HTMLInputElement>(null);
   const [jwt, setjwt] = useState("");
   const [uid, setuid] = useState("");
   const [showComments, setShowComments] = useState(false);
   const [showHearts, setShowHearts] = useState(false);
   const [loved, setLoved] = useState(false);
-
+  const router = useRouter()
   useEffect(() => {
     const jwt = cookieCutter.get("jwt");
     setjwt(jwt);
@@ -27,7 +27,6 @@ const PostCard = ({ post }: { post: Post }) => {
     if (post.hearts.length !== 0) {
       post.hearts.map((user) => {
         if (user.id.toString() === cookieCutter.get("uid")) {
-          console.log("is equal");
           setLoved(true);
         }
       });
@@ -47,6 +46,13 @@ const PostCard = ({ post }: { post: Post }) => {
             },
           })
           .then((res) => {
+            setAlert({
+              type: "success",
+              body: "Comment added Successfully",
+            });
+            setInterval(() => {
+              setAlert(undefined);
+            }, 3000);
             if (comment.current?.value) {
               comment.current.value = "";
             }
@@ -143,6 +149,7 @@ const PostCard = ({ post }: { post: Post }) => {
         <div
           onClick={() => {
             setShowComments(true);
+            router.push('#comment-card-header')
           }}
           className="px-5 text-gray-400 cursor-pointer hover:underline"
         >

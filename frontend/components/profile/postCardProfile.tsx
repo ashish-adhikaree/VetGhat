@@ -13,12 +13,12 @@ const PostCardProfile = ({ post }: { post: ProfilePost }) => {
           <RiCheckboxMultipleBlankFill />
         </div>
       )}
-      <div className="hidden group-hover:flex items-center justify-center space-x-3 font-semibold absolute group-hover:bg-[rgba(0,0,0,.1)] h-full w-full text-white text-xl">
-        <div>
+      <div className="hidden group-hover:flex items-center justify-center space-x-3 font-semibold absolute group-hover:bg-[rgba(0,0,0,.5)] h-full w-full text-white text-xl">
+        <div className="text-center">
           <AiFillHeart />
           <span>{post.heartcount}</span>
         </div>
-        <div>
+        <div className="text-center">
           <BiComment />
           <span>{post.commentcount}</span>
         </div>

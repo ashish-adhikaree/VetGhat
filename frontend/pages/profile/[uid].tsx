@@ -18,7 +18,7 @@ const Profile = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [isUser, setIsUser] = useState<boolean>(false);
   const [userDetails, setUserDetails] = useState<UserDetails>({
-    id: "default",
+    id: 0,
     profilepic: { url: "/" },
     username: "default",
     bio: "",
@@ -27,7 +27,7 @@ const Profile = () => {
     postsCount: 0,
     posts: [
       {
-        id: "default",
+        id: 0,
         thumbnail: { url: "/" },
         multiImages: false,
         heartcount: 0,
@@ -55,6 +55,8 @@ const Profile = () => {
                 "profilepic",
                 "posts",
                 "posts.content",
+                "posts.comments",
+                "posts.hearts",
                 "followers",
                 "followers.profilepic",
                 "followings",
