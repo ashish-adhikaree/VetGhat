@@ -2,7 +2,7 @@ import cookieCutter from "cookie-cutter";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { CleanPostResponse } from "../../helper_functions/cleanStrapiResponse";
-import { Post } from "../../typedeclaration";
+import { AlertType, Post } from "../../typedeclaration";
 import Layout from "../../components/Layout/layout";
 import Axios from "../../axios";
 import Image from "next/image";
@@ -14,13 +14,16 @@ import { AiOutlineSend } from "react-icons/ai";
 import Comment from "../../components/post/comment";
 import Head from "next/head";
 import SinglePostLoader from "../../components/post/singlePostLoader";
+import GlobalAlert from "../../components/alert/globalalert";
+import { Socket } from "socket.io-client";
 
-const SinglePost = () => {
+const SinglePost = ({ socket }: { socket: Socket }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [post, setPost] = useState<Post>();
   const [jwt, setjwt] = useState("");
   const comment = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const [alert, setAlert] = useState<AlertType>();
 
   useEffect(() => {
     if (router.query.postid) {
@@ -29,28 +32,38 @@ const SinglePost = () => {
       const jwt = cookieCutter.get("jwt");
       setjwt(jwt);
 
-      Axios(jwt)
-        .get(`${process.env.STRAPI_URL}/api/posts/${postid}`, {
-          params: {
-            populate: [
-              "author",
-              "author.profilepic",
-              "content",
-              "hearts",
-              "hearts.profilepic",
-              "comments",
-              "comments.author",
-              "comments.author.profilepic",
-            ],
-          },
-        })
-        .then((res) => {
-          console.log(res);
-          setPost(CleanPostResponse(res.data.data));
-          setLoading(false);
-        })
-        .catch((err) => console.log(err));
+      const getPost = () => {
+        Axios(jwt)
+          .get(`${process.env.STRAPI_URL}/api/posts/${postid}`, {
+            params: {
+              populate: [
+                "author",
+                "author.profilepic",
+                "content",
+                "hearts",
+                "hearts.profilepic",
+                "comments",
+                "comments.author",
+                "comments.author.profilepic",
+              ],
+            },
+          })
+          .then((res) => {
+            console.log(res);
+            setPost(CleanPostResponse(res.data.data));
+            setLoading(false);
+          })
+          .catch((err) => console.log(err));
+      };
+      getPost();
+
+      socket.on("comment:create", () => {
+        getPost();
+      });
     }
+    return () => {
+      socket.removeAllListeners();
+    };
   }, [router]);
 
   const handleComment = (e: any) => {
@@ -66,11 +79,27 @@ const SinglePost = () => {
             },
           })
           .then((res) => {
+            setAlert({
+              type: "success",
+              body: "Comment added Successfully",
+            });
+            setInterval(() => {
+              setAlert(undefined);
+            }, 3000);
+
             if (comment.current?.value) {
               comment.current.value = "";
             }
           })
-          .catch((err) => console.log(err));
+          .catch((err) => {
+            setAlert({
+              type: "Error",
+              body: "Could not add comment. Please Retry!",
+            });
+            setInterval(() => {
+              setAlert(undefined);
+            }, 3000);
+          });
       }
     }
   };
@@ -81,7 +110,7 @@ const SinglePost = () => {
   return (
     <Layout>
       {post && (
-        <div className="h-[80vh] flex bg-white m-5 space-x-5 ">
+        <div className="h-[80vh] flex bg-white m-5 space-x-5 relative">
           <Head>
             <title>Post-{post.author.username}</title>
             <meta name="description" content="Developed by Ashish" />
@@ -108,6 +137,7 @@ const SinglePost = () => {
                 <UserAvatar src={post.author.profilepic.url} />
                 <div className="">
                   <Link
+                  as={`/profile/${post.author.id}`}
                     href={`/profile/${post.author.id}`}
                     className="font-bold hover:underline"
                   >
@@ -147,7 +177,7 @@ const SinglePost = () => {
                 </div>
               )}
             </div>
-            <form className="absolute bottom-0 left-0 right-0 flex items-center px-3 h-[4rem] border-t bg-white">
+            <form className="p-5 flex items-center px-3 border-t bg-white">
               <input
                 ref={comment}
                 className="bg-transparent flex-grow outline-none"
@@ -160,6 +190,7 @@ const SinglePost = () => {
                 onClick={handleComment}
               />
             </form>
+            {alert && <GlobalAlert type={alert.type} body={alert.body} />}
           </div>
         </div>
       )}

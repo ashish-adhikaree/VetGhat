@@ -12,14 +12,14 @@ import Axios from "../../axios";
 import CommentCard from "./commentCard";
 import HeartCard from "./heartCard";
 import { useRouter } from "next/router";
-const PostCard = ({ post, setAlert }: { post: Post, setAlert: any}) => {
+const PostCard = ({ post, setAlert }: { post: Post; setAlert: any }) => {
   const comment = useRef<HTMLInputElement>(null);
   const [jwt, setjwt] = useState("");
   const [uid, setuid] = useState("");
   const [showComments, setShowComments] = useState(false);
   const [showHearts, setShowHearts] = useState(false);
   const [loved, setLoved] = useState(false);
-  const router = useRouter()
+  const router = useRouter();
   useEffect(() => {
     const jwt = cookieCutter.get("jwt");
     setjwt(jwt);
@@ -57,7 +57,15 @@ const PostCard = ({ post, setAlert }: { post: Post, setAlert: any}) => {
               comment.current.value = "";
             }
           })
-          .catch((err) => console.log(err));
+          .catch((err) => {
+            setAlert({
+              type: "Error",
+              body: "Could not add comment. Please Retry!",
+            });
+            setInterval(() => {
+              setAlert(undefined);
+            }, 3000);
+          });
       }
     }
   };
@@ -70,7 +78,11 @@ const PostCard = ({ post, setAlert }: { post: Post, setAlert: any}) => {
         />
       )}
       {showHearts && (
-        <HeartCard showHeartCard={setShowHearts} uid={uid} hearts={post.hearts} />
+        <HeartCard
+          showHeartCard={setShowHearts}
+          uid={uid}
+          hearts={post.hearts}
+        />
       )}
       <div className="flex items-center space-x-5 p-5">
         <UserAvatar src={post.author.profilepic.url} />
@@ -131,10 +143,18 @@ const PostCard = ({ post, setAlert }: { post: Post, setAlert: any}) => {
           } ${
             loved
               ? post.hearts.length > 2
-                ? `and ${post.hearts.length - 2 === 1? "1 other" : `${post.hearts.length - 2} others`}`
+                ? `and ${
+                    post.hearts.length - 2 === 1
+                      ? "1 other"
+                      : `${post.hearts.length - 2} others`
+                  }`
                 : ""
               : post.hearts.length > 1
-              ? `and ${post.hearts.length - 1 == 1 ? "1 other" : `${post.hearts.length - 1} others`}`
+              ? `and ${
+                  post.hearts.length - 1 == 1
+                    ? "1 other"
+                    : `${post.hearts.length - 1} others`
+                }`
               : ""
           }`}
         </div>
@@ -149,11 +169,14 @@ const PostCard = ({ post, setAlert }: { post: Post, setAlert: any}) => {
         <div
           onClick={() => {
             setShowComments(true);
-            router.push('#comment-card-header')
+            router.push("#comment-card-header");
           }}
           className="px-5 text-gray-400 cursor-pointer hover:underline"
         >
-          View {post.commentcount === 1 ? "1 comment" : `all ${post.commentcount} comments`}
+          View{" "}
+          {post.commentcount === 1
+            ? "1 comment"
+            : `all ${post.commentcount} comments`}
         </div>
       )}
       <p className="text-gray-400 px-5 uppercase text-sm">

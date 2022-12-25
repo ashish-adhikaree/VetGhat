@@ -42,12 +42,14 @@ export interface ProfilePost{
 export interface UserDetails{
     id: number,
     username: string,
-    bio: string,
+    bio?: string,
     profilepic: ImageType,
-    followersCount: number,
-    followingCount: number,
-    postsCount: number,
-    posts: ProfilePost[]
+    followersCount?: number,
+    followingCount?: number,
+    postsCount?: number,
+    posts?: ProfilePost[],
+    followers?: User[] | undefined,
+    followings?: User[] | undefined,
 }
 
 // Signup or Login Form

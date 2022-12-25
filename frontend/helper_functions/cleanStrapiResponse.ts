@@ -102,6 +102,22 @@ export const CleanUserDetailsResponse = (user: any) => {
   const temp: UserDetails = {
     id: user.id,
     username: user.username,
+    profilepic:
+      user.profilepic === null
+        ? {
+            url: "/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z",
+          }
+        : { url: user.profilepic.url },
+    followersCount: user.followers.length,
+  };
+
+  return temp;
+};
+
+export const CleanProfileUserDetailsResponse = (user: any) => {
+  const temp: UserDetails = {
+    id: user.id,
+    username: user.username,
     bio: user.bio,
     profilepic:
       user.profilepic === null
@@ -113,6 +129,25 @@ export const CleanUserDetailsResponse = (user: any) => {
     followingCount: user.followings.length,
     postsCount: user.posts.length,
     posts: CleanProfilePostResponseArray(user.posts),
+    followers: user.followers && user.followers.length!==0? user.followers.map((user:any)=>(
+      CleanFollowersFollowingsResponse(user)
+    )): undefined,
+    followings: user.followings && user.followings.length!==0? user.followings.map((user:any)=>(
+      CleanFollowersFollowingsResponse(user)
+    )): undefined 
   };
   return temp;
 };
+
+export const CleanFollowersFollowingsResponse = (user: any) => {
+  const temp : User = {
+    id: user.id,
+    username: user.username,
+    profilepic: user.profilepic === null
+    ? {
+        url: "/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z",
+      }
+    : { url: user.profilepic.url },
+  }
+  return temp
+}

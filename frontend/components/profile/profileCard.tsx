@@ -1,12 +1,70 @@
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UserDetails } from "../../typedeclaration";
-const ProfileCard = ({ user, isUser }: { user: UserDetails; isUser: boolean }) => {
+import cookieCutter from "cookie-cutter";
+import Axios from "../../axios";
+import { Socket } from "socket.io-client";
+
+const ProfileCard = ({
+  user,
+  isUser,
+  socket,
+}: {
+  user: UserDetails;
+  isUser: boolean;
+  socket: Socket;
+}) => {
   const [hasFollowed, setHasFollowed] = useState<boolean>(false);
-  const handleFollow = (e: any) => {
+  const [uid, setUID] = useState<string>("");
+  const [jwt, setJWT] = useState<string>("");
+  const handleFollow = async (e: any) => {
     e.preventDefault();
     setHasFollowed(!hasFollowed);
+    let yourFollowings: number[] = [];
+    await Axios(jwt)
+      .get(`${process.env.STRAPI_URL}/api/users/${uid}`, {
+        params: {
+          populate: ["followings"],
+        },
+      })
+      .then((res) => {
+        yourFollowings = res.data.followings.map((user: any) => user.id);
+      })
+      .catch((err) => console.log(err));
+
+    const updatedFollowings: number[] = [];
+    if (hasFollowed) {
+      yourFollowings.map((id) => {
+        if (id !== user.id) {
+          updatedFollowings.push(id);
+        }
+      });
+    } else {
+      updatedFollowings.push(...yourFollowings, user.id);
+    }
+    Axios(jwt)
+      .put(`${process.env.STRAPI_URL}/api/users/${uid}`, {
+        followings: updatedFollowings,
+      })
+      .then((res) => {
+        console.log("user updated");
+        socket.emit("updateuser", "user updated");
+      })
+      .catch((err) => console.log(err));
   };
+
+  useEffect(() => {
+    setUID(cookieCutter.get("uid"));
+    setJWT(cookieCutter.get("jwt"));
+    if (user.followers) {
+      user.followers.map((user) => {
+        if (user.id.toString() === cookieCutter.get("uid")) {
+          setHasFollowed(true);
+        }
+      });
+    }
+  }, [user]);
+
   return (
     <div className="w-full md:w-[3/2] max-w-xl flex items-center md:space-x-10 space-x-5 justify-center mt-10">
       <Image
@@ -15,12 +73,12 @@ const ProfileCard = ({ user, isUser }: { user: UserDetails; isUser: boolean }) =
         width={150}
         height={150}
         src={`${process.env.STRAPI_URL + user.profilepic.url}`}
-        priority = {true}
+        priority={true}
       />
       <div className="space-y-5 bg-white p-5 md:p-10 rounded-md">
         <div className="flex items-center space-x-5">
           <p className="text-xl font-bold text-gray-700">{user.username}</p>
-          <div className="w-[40px]">
+          <div className="w-[100px]">
             {!isUser && !hasFollowed && (
               <button
                 className="bg-blue-400 text-white px-3 py-1 rounded-md"

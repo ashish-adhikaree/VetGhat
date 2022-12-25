@@ -13,6 +13,7 @@ module.exports = ({ env }) => ({
       contentTypes: {
         post: "*",
         comment: ["create"],
+        user: "*"
       },
       events: [
         {
@@ -20,9 +21,15 @@ module.exports = ({ env }) => ({
           handler: ({ strapi }, socket) => {
             strapi.log.info(`[io] new connection with id ${socket.id}`);
           },
-        },
+        },{
+          name: "updateuser",
+          handler: ({strapi})=>{
+            strapi.$io.raw("user:update", "user updated")
+          }
+        }
       ],
     },
   },
   // ...
 });
+
