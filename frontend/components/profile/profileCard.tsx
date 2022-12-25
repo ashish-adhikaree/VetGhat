@@ -4,6 +4,7 @@ import { UserDetails } from "../../typedeclaration";
 import cookieCutter from "cookie-cutter";
 import Axios from "../../axios";
 import { Socket } from "socket.io-client";
+import UserList from "./userList";
 
 const ProfileCard = ({
   user,
@@ -17,10 +18,23 @@ const ProfileCard = ({
   const [hasFollowed, setHasFollowed] = useState<boolean>(false);
   const [uid, setUID] = useState<string>("");
   const [jwt, setJWT] = useState<string>("");
+  const [followersCardState, setFollowersCardState] = useState<boolean>(false);
+  const [followingsCardState, setFollowingsCardState] =
+    useState<boolean>(false);
+
+  const switchCardState = (type: string) => {
+    if (type.toLowerCase() === "followers") {
+      setFollowersCardState(!followersCardState);
+    } else if (type.toLowerCase() === "followings") {
+      setFollowingsCardState(!followingsCardState);
+    }
+  };
+
   const handleFollow = async (e: any) => {
     e.preventDefault();
     setHasFollowed(!hasFollowed);
     let yourFollowings: number[] = [];
+
     await Axios(jwt)
       .get(`${process.env.STRAPI_URL}/api/users/${uid}`, {
         params: {
@@ -42,12 +56,12 @@ const ProfileCard = ({
     } else {
       updatedFollowings.push(...yourFollowings, user.id);
     }
+
     Axios(jwt)
       .put(`${process.env.STRAPI_URL}/api/users/${uid}`, {
         followings: updatedFollowings,
       })
       .then((res) => {
-        console.log("user updated");
         socket.emit("updateuser", "user updated");
       })
       .catch((err) => console.log(err));
@@ -66,9 +80,15 @@ const ProfileCard = ({
   }, [user]);
 
   return (
-    <div className="w-full md:w-[3/2] max-w-xl flex items-center md:space-x-10 space-x-5 justify-center mt-10">
+    <div className="flex items-center mt-10">
+      {followersCardState && (
+        <UserList switchCardState={setFollowersCardState} type="followers" users={user.followers}/>
+      )}
+      {followingsCardState && (
+        <UserList switchCardState={setFollowingsCardState} type="followings" users={user.followings}/>
+      )}
       <Image
-        className="rounded-full"
+        className="rounded-full mr-5"
         alt="profile-pic"
         width={150}
         height={150}
@@ -98,11 +118,21 @@ const ProfileCard = ({
           </div>
         </div>
         <div className="flex space-x-5  text-gray-600">
-          <div className="text-center">
+          <div
+            className="text-center cursor-pointer"
+            onClick={() => {
+              switchCardState("followers");
+            }}
+          >
             <strong>{user.followersCount}</strong>
             <p>Followers</p>
           </div>
-          <div className="text-center">
+          <div
+            className="text-center cursor-pointer"
+            onClick={() => {
+              switchCardState("followings");
+            }}
+          >
             <strong>{user.followingCount}</strong>
             <p>Followings</p>
           </div>
