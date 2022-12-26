@@ -29,17 +29,6 @@ export default function Home({ socket }: { socket: Socket }) {
 
   useEffect(() => {
     const jwt = cookieCutter.get("jwt");
-    console.log(socket);
-
-    //  wait until socket connects before adding event listeners
-    if (socket) {
-      socket.on("post:create", () => {
-        getPosts();
-      });
-      socket.on("comment:create", () => {
-        getPosts();
-      });
-    }
 
     setjwt(cookieCutter.get("jwt"));
     // Getting users
@@ -118,10 +107,22 @@ export default function Home({ socket }: { socket: Socket }) {
       }
     };
     getPosts();
+    //  wait until socket connects before adding event listeners
+    if (socket) {
+      socket.on("post:create", () => {
+        getPosts();
+      });
+      socket.on("likesUpdated",()=>{
+        console.log("fired")
+        getPosts();
+      })
+      socket.on("comment:create", () => {
+        getPosts();
+      });
+    }
   }, [poststype]);
 
   const handlePostsTypeChange = (e: any) => {
-    console.log(e.target.value)
     setPostsType(e.target.value);
     setIsLoading(true);
   };
@@ -169,7 +170,7 @@ export default function Home({ socket }: { socket: Socket }) {
             </select>
             {posts &&
               posts.map((post: Post, index) => {
-                return <PostCard setAlert={setAlert} key={index} post={post} />;
+                return <PostCard socket={socket} setAlert={setAlert} key={index} post={post} />;
               })}
           </div>
           <RightSidebar />

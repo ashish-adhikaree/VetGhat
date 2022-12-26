@@ -18,7 +18,6 @@ const CommentCard = ({
           className="text-xl cursor-pointer"
           onClick={() => {
             showCommentCard(false);
-            router.push('')
           }}
         />
         <p className="flex-grow">Comments</p>

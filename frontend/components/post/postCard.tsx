@@ -12,7 +12,8 @@ import Axios from "../../axios";
 import CommentCard from "./commentCard";
 import HeartCard from "./heartCard";
 import { useRouter } from "next/router";
-const PostCard = ({ post, setAlert }: { post: Post; setAlert: any }) => {
+import { Socket } from "socket.io-client";
+const PostCard = ({ post, setAlert, socket }: { post: Post; setAlert: any, socket:Socket }) => {
   const comment = useRef<HTMLInputElement>(null);
   const [jwt, setjwt] = useState("");
   const [uid, setuid] = useState("");
@@ -20,6 +21,7 @@ const PostCard = ({ post, setAlert }: { post: Post; setAlert: any }) => {
   const [showHearts, setShowHearts] = useState(false);
   const [loved, setLoved] = useState(false);
   const router = useRouter();
+
   useEffect(() => {
     const jwt = cookieCutter.get("jwt");
     setjwt(jwt);
@@ -33,42 +35,77 @@ const PostCard = ({ post, setAlert }: { post: Post; setAlert: any }) => {
     }
   }, []);
 
-  const handleComment = (e: any) => {
+  const handleLove = async (e: any) => {
+    e.preventDefault();
+    setLoved(!loved);
+    let yourLikedPosts: number[] = [];
+    try {
+      const res = await Axios(jwt).get(
+        `${process.env.STRAPI_URL}/api/users/${uid}`,
+        {
+          params: {
+            populate: ["likedPosts"],
+          },
+        }
+      );
+      res.data.likedPosts.map((post: any) => post.id);
+    } catch (err) {
+      console.log(err);
+    }
+
+    const updatedLikedPosts: number[] = [];
+    if (loved) {
+      yourLikedPosts.map((id) => {
+        if (id !== post.id) {
+          updatedLikedPosts.push(id);
+        }
+      });
+    } else {
+      updatedLikedPosts.push(...yourLikedPosts, post.id);
+    }
+
+    try {
+      Axios(jwt).put(`${process.env.STRAPI_URL}/api/users/${uid}`, {
+        likedPosts: updatedLikedPosts,
+      });
+      socket.emit("updateLikes","likesUpdated")
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleComment = async (e: any) => {
     e.preventDefault();
     if (comment.current) {
-      console.log(comment.current.value);
       if (comment.current.value !== "") {
-        Axios(jwt)
-          .post(`${process.env.STRAPI_URL}/api/comments`, {
+        try {
+          await Axios(jwt).post(`${process.env.STRAPI_URL}/api/comments`, {
             data: {
               post: post.id.toString(),
               body: comment.current.value,
             },
-          })
-          .then((res) => {
-            setAlert({
-              type: "success",
-              body: "Comment added Successfully",
-            });
-            setInterval(() => {
-              setAlert(undefined);
-            }, 3000);
-            if (comment.current?.value) {
-              comment.current.value = "";
-            }
-          })
-          .catch((err) => {
-            setAlert({
-              type: "Error",
-              body: "Could not add comment. Please Retry!",
-            });
-            setInterval(() => {
-              setAlert(undefined);
-            }, 3000);
           });
+          setAlert({
+            type: "success",
+            body: "Comment added Successfully",
+          });
+          setInterval(() => {
+            setAlert(undefined);
+          }, 3000);
+          comment.current.value = "";
+        } catch (error) {
+          setAlert({
+            type: "Error",
+            body: "Could not add comment. Please Retry!",
+          });
+          setInterval(() => {
+            setAlert(undefined);
+          }, 3000);
+        }
       }
     }
   };
+
   return (
     <div className="bg-white w-full space-y-3 relative">
       {showComments && (
@@ -114,7 +151,7 @@ const PostCard = ({ post, setAlert }: { post: Post; setAlert: any }) => {
         </Link>
       )}
       <div className="h-10 flex items-center space-x-4 px-5">
-        <div className="postcard-icon-container">
+        <div className="postcard-icon-container" onClick={handleLove}>
           {loved ? (
             <AiFillHeart className="postcard-icon text-red-500" />
           ) : (
@@ -169,7 +206,6 @@ const PostCard = ({ post, setAlert }: { post: Post; setAlert: any }) => {
         <div
           onClick={() => {
             setShowComments(true);
-            router.push("#comment-card-header");
           }}
           className="px-5 text-gray-400 cursor-pointer hover:underline"
         >

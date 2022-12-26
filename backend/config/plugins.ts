@@ -26,6 +26,11 @@ module.exports = ({ env }) => ({
           handler: ({strapi})=>{
             strapi.$io.raw("user:update", "user updated")
           }
+        },{
+          name:"updateLikes",
+          handler:({strapi})=>{
+            strapi.$io.raw("likesUpdated", "likes updated")
+          }
         }
       ],
     },

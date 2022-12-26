@@ -66,40 +66,35 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
     };
   }, [router,socket]);
 
-  const handleComment = (e: any) => {
+  const handleComment = async(e: any) => {
     e.preventDefault();
     if (comment.current) {
-      console.log(comment.current.value);
       if (comment.current.value !== "") {
-        Axios(jwt)
+        try{
+          await Axios(jwt)
           .post(`${process.env.STRAPI_URL}/api/comments`, {
             data: {
-              post: post ? post.id.toString() : "",
+              post: post?.id.toString(),
               body: comment.current.value,
             },
           })
-          .then((res) => {
-            setAlert({
-              type: "success",
-              body: "Comment added Successfully",
-            });
-            setInterval(() => {
-              setAlert(undefined);
-            }, 3000);
-
-            if (comment.current?.value) {
-              comment.current.value = "";
-            }
-          })
-          .catch((err) => {
-            setAlert({
-              type: "Error",
-              body: "Could not add comment. Please Retry!",
-            });
-            setInterval(() => {
-              setAlert(undefined);
-            }, 3000);
+          setAlert({
+            type: "success",
+            body: "Comment added Successfully",
           });
+          setInterval(() => {
+            setAlert(undefined);
+          }, 3000);
+          comment.current.value = ""
+        }catch(error){
+          setAlert({
+            type: "Error",
+            body: "Could not add comment. Please Retry!",
+          });
+          setInterval(() => {
+            setAlert(undefined);
+          }, 3000);
+        }
       }
     }
   };
