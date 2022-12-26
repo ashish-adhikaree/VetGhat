@@ -19,6 +19,7 @@ import { Socket } from "socket.io-client";
 
 export default function Home({ socket }: { socket: Socket }) {
   const [posts, setPosts] = useState<Post[]>();
+  const [followingsPosts, setFollowingsPosts] = useState<Post[]>();
   const [isLoading, setIsLoading] = useState(true);
   const [jwt, setjwt] = useState("");
   const [postCardExtendedIsVisible, setpostCardExtendedIsVisible] =
@@ -26,11 +27,82 @@ export default function Home({ socket }: { socket: Socket }) {
   const [alert, setAlert] = useState<AlertType>();
   const [userDetails, setUserDetails] = useState<UserDetails>();
   const [poststype, setPostsType] = useState("allposts");
+  const postTypeSelect = useRef<any>()
+  const isFirstLoad = useRef(true)
+
+
+  // Getting posts from user you follow 
+  const getFollowingsPosts = () => {
+    const jwt = cookieCutter.get("jwt");
+    Axios(jwt)
+      .get(`${process.env.STRAPI_URL}/api/findfriendsposts`, {
+        params: {
+          populate: [
+            "author.profilepic",
+            "author.posts",
+            "content",
+            "comments",
+            "comments.author",
+            "comments.author.profilepic",
+            "hearts",
+            "hearts.profilepic",
+          ],
+          sort: ["createdAt:desc"],
+        },
+      })
+      .then((res) => {
+        console.log("posts", res.data);
+        if (res.data !== null && res.data.length !== 0) {
+          setFollowingsPosts(CleanPostResponseArray(res.data));
+          setIsLoading(false);
+        }
+      })
+      .catch((err) => console.log(err));
+  };
+
+  // Getting posts
+  const getPosts = () => {
+    const jwt = cookieCutter.get("jwt");
+    Axios(jwt)
+      .get(`${process.env.STRAPI_URL}/api/posts`, {
+        params: {
+          populate: [
+            "author.profilepic",
+            "author.posts",
+            "content",
+            "comments",
+            "comments.author",
+            "comments.author.profilepic",
+            "hearts",
+            "hearts.profilepic",
+          ],
+          sort: ["createdAt:desc"],
+        },
+      })
+      .then((res) => {
+        console.log("posts", res.data.data);
+        if (res.data.data !== null) {
+          setPosts(CleanPostResponseArray(res.data.data));
+          setIsLoading(false);
+        }
+      })
+      .catch((err) => console.log(err));
+  };
+
+  const updatePosts = () => {
+    if (postTypeSelect.current?.value === "allposts"){
+      getPosts();
+    }else if(postTypeSelect.current?.value === "followings"){
+      getFollowingsPosts();
+    }
+  }
 
   useEffect(() => {
-    const jwt = cookieCutter.get("jwt");
+    if (isFirstLoad.current){
+      const jwt = cookieCutter.get("jwt");
 
     setjwt(cookieCutter.get("jwt"));
+
     // Getting users
     Axios(jwt)
       .get(`${process.env.STRAPI_URL}/api/users/me`, {
@@ -52,79 +124,24 @@ export default function Home({ socket }: { socket: Socket }) {
       })
       .catch((err) => console.log(err));
 
-    // Getting posts
-    const getPosts = () => {
-      if (poststype === "allposts") {
-        Axios(jwt)
-          .get(`${process.env.STRAPI_URL}/api/posts`, {
-            params: {
-              populate: [
-                "author.profilepic",
-                "author.posts",
-                "content",
-                "comments",
-                "comments.author",
-                "comments.author.profilepic",
-                "hearts",
-                "hearts.profilepic",
-              ],
-              sort: ["createdAt:desc"],
-            },
-          })
-          .then((res) => {
-            console.log("posts", res.data.data);
-            if (res.data.data !== null) {
-              setPosts(CleanPostResponseArray(res.data.data));
-              setIsLoading(false);
-            }
-          })
-          .catch((err) => console.log(err));
-      } else if (poststype === "followings") {
-        Axios(jwt)
-          .get(`${process.env.STRAPI_URL}/api/findfriendsposts`, {
-            params: {
-              populate: [
-                "author.profilepic",
-                "author.posts",
-                "content",
-                "comments",
-                "comments.author",
-                "comments.author.profilepic",
-                "hearts",
-                "hearts.profilepic",
-              ],
-              sort: ["createdAt:desc"],
-            },
-          })
-          .then((res) => {
-            console.log("posts", res.data);
-            if (res.data !== null && res.data.length !== 0) {
-              setPosts(CleanPostResponseArray(res.data));
-              setIsLoading(false);
-            }
-          })
-          .catch((err) => console.log(err));
-      }
-    };
+
     getPosts();
+    getFollowingsPosts();
+
     //  wait until socket connects before adding event listeners
     if (socket) {
-      socket.on("post:create", () => {
-        getPosts();
-      });
-      socket.on("likesUpdated",()=>{
-        console.log("fired")
-        getPosts();
-      })
-      socket.on("comment:create", () => {
-        getPosts();
-      });
+      socket.on("post:create",updatePosts );
+      socket.on("likesUpdated", updatePosts);
+      socket.on("comment:create", updatePosts);
     }
-  }, [poststype]);
+    }
+    return ()=>{
+      isFirstLoad.current = false
+    }
+  },[]);
 
   const handlePostsTypeChange = (e: any) => {
     setPostsType(e.target.value);
-    setIsLoading(true);
   };
 
   const changePostCardExtendedState = (state: boolean) => {
@@ -134,6 +151,7 @@ export default function Home({ socket }: { socket: Socket }) {
   if (isLoading) return <Loader />;
   return (
     <Layout>
+      {poststype}
       {userDetails && (
         <div
           className={`min-h-screen flex justify-center ${
@@ -164,14 +182,37 @@ export default function Home({ socket }: { socket: Socket }) {
                 user={userDetails}
               />
             )}
-            <select value={poststype} className="self-start px-5 py-3 bg-white font-semibold cursor-pointer text-gray-600" onChange={handlePostsTypeChange}>
+            <select
+              ref = {postTypeSelect}
+              value={poststype}
+              className="self-start px-5 py-3 bg-white font-semibold cursor-pointer text-gray-600"
+              onChange={handlePostsTypeChange}
+            >
               <option value="allposts">All Posts</option>
               <option value="followings">Followings</option>
             </select>
-            {posts &&
+            {poststype==="allposts" && posts &&
               posts.map((post: Post, index) => {
-                return <PostCard socket={socket} setAlert={setAlert} key={index} post={post} />;
+                return (
+                  <PostCard
+                    socket={socket}
+                    setAlert={setAlert}
+                    key={index}
+                    post={post}
+                  />
+                );
               })}
+            {poststype==="followings" && followingsPosts &&
+            followingsPosts.map((post: Post, index) => {
+              return (
+                <PostCard
+                  socket={socket}
+                  setAlert={setAlert}
+                  key={index}
+                  post={post}
+                />
+              );
+            })}
           </div>
           <RightSidebar />
         </div>
