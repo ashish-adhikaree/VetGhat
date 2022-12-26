@@ -57,6 +57,7 @@ const LoginCard = ({ switchCards, setjwt, setuid }: any) => {
           router.push("/");
         })
         .catch((error) => {
+          console.log(error)
           // Handle error.
           setAlert({
             type: "error",

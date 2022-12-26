@@ -3,10 +3,12 @@ import type { AppProps } from "next/app";
 import { useEffect, useRef, useState } from "react";
 import cookieCutter from "cookie-cutter";
 import { Socket } from "socket.io-client";
+import { useRouter } from "next/router";
 
 export default function App({ Component, pageProps }: AppProps) {
   const isSocketPresent = useRef(false);
   const [socket, setSocket] = useState<Socket>();
+  const router = useRouter()
   useEffect(() => {
     if (!isSocketPresent.current) {
       const jwt = cookieCutter.get("jwt");
@@ -30,5 +32,5 @@ export default function App({ Component, pageProps }: AppProps) {
     }
   }, []);
   
-  if (socket) return <Component socket={socket} {...pageProps} />;
+  if (socket) return <Component socket={socket} {...pageProps}  key={router.asPath}/>;
 }

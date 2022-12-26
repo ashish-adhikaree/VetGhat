@@ -5,6 +5,7 @@ import cookieCutter from "cookie-cutter";
 import Axios from "../../axios";
 import { Socket } from "socket.io-client";
 import UserList from "./userList";
+import { useRouter } from "next/router";
 
 const ProfileCard = ({
   user,
@@ -21,6 +22,7 @@ const ProfileCard = ({
   const [followersCardState, setFollowersCardState] = useState<boolean>(false);
   const [followingsCardState, setFollowingsCardState] =
     useState<boolean>(false);
+  const router = useRouter()
 
   const switchCardState = (type: string) => {
     if (type.toLowerCase() === "followers") {
@@ -68,6 +70,7 @@ const ProfileCard = ({
   };
 
   useEffect(() => {
+    setHasFollowed(false)
     setUID(cookieCutter.get("uid"));
     setJWT(cookieCutter.get("jwt"));
     if (user.followers) {
@@ -77,7 +80,7 @@ const ProfileCard = ({
         }
       });
     }
-  }, [user]);
+  }, [user, router]);
 
   return (
     <div className="flex items-center mt-10">

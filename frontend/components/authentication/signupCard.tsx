@@ -64,38 +64,13 @@ const SignupCard = ({ switchCards, setjwt, setuid }: any) => {
             router.push("/");
           })
           .catch((error) => {
+            console.log(error)
             // Handle error.
             setAlert({
               type: "error",
               body: error.message,
             });
           });
-
-        //   const client = createClient("")
-        //   client
-        // .mutate({
-        //   mutation: SignUp,
-        //   variables:{
-        //     username: formValue?.name,
-        //     password: formValue?.password,
-        //     email: formValue?.email
-        //   }
-        // })
-        // .then((res) => {
-        //   setAlert({
-        //     type: "success",
-        //     body:"Account Created Successfully. Redirecting..."
-        //   })
-        //   setjwt(res.data?.register?.jwt)
-        //   setuid(res.data.register.user.id)
-        //   router.push('/')
-        // })
-        // .catch((error) => {
-        //   setAlert({
-        //     type: "error",
-        //     body:error.message
-        //   })
-        // });
       } else {
         setAlert({
           type: "error",

@@ -18,12 +18,14 @@ import { BsBookmarkHeart } from "react-icons/bs";
 
 const Profile = ({ socket }: { socket: Socket }) => {
   const [loading, setLoading] = useState<boolean>(true);
+  const [postLoading, setPostLoading] = useState<boolean>(true);
   const [isUser, setIsUser] = useState<boolean>(false);
   const [userDetails, setUserDetails] = useState<UserDetails>();
   const [id, setID] = useState<string>("");
   const router = useRouter();
 
   const getLikedPosts = (id: string) => {
+    setPostLoading(true);
     const jwt = cookieCutter.get("jwt");
     Axios(jwt)
       .get(`${process.env.STRAPI_URL}/api/users/${id}`, {
@@ -42,6 +44,7 @@ const Profile = ({ socket }: { socket: Socket }) => {
           temp.posts = CleanProfilePostResponseArray(res.data.likedPosts);
         }
         setUserDetails(temp)
+        setPostLoading(false)
       })
       .catch((err) => console.log(err));
   };
@@ -67,19 +70,19 @@ const Profile = ({ socket }: { socket: Socket }) => {
       .then((res) => {
         setUserDetails(CleanProfileUserDetailsResponse(res.data));
         setLoading(false);
+        setPostLoading(false);
       })
       .catch((err) => console.log(err));
   };
 
   useEffect(() => {
     if (router.query.uid) {
+      setIsUser(false)
       const id = router.query.uid.toString();
       setID(id);
       const uid = cookieCutter.get("uid");
       if (id === uid) {
         setIsUser(true);
-      }else{
-        setIsUser(false)
       }
       getUser(id);
 
@@ -89,7 +92,7 @@ const Profile = ({ socket }: { socket: Socket }) => {
         });
       }
     }
-  }, [router]);
+  }, [router,socket]);
 
   if (loading) {
     return <Loader />;
@@ -127,7 +130,7 @@ const Profile = ({ socket }: { socket: Socket }) => {
                 </button>
               </div>
             )}
-            {userDetails.posts &&
+            {!postLoading ? userDetails.posts &&
               (userDetails.posts.length === 0 ? (
                 <p className="border-t border-gray-400 pt-5 w-full text-center font-bold text-xl text-gray-600">
                   No Posts
@@ -140,7 +143,7 @@ const Profile = ({ socket }: { socket: Socket }) => {
                     <PostCardProfile key={post.id} post={post} />
                   ))}
                 </div>
-              ))
+              )) : <div>Loading...</div>
             }
           </div>
         </div>

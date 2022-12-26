@@ -7,7 +7,7 @@ import {
   CleanPostResponseArray,
   CleanUserDetailsResponse,
 } from "../helper_functions/cleanStrapiResponse";
-import { useEffect, useRef, useState } from "react";
+import { LegacyRef, useEffect, useRef, useState } from "react";
 import Layout from "../components/Layout/layout";
 import cookieCutter from "cookie-cutter";
 import Loader from "../components/post/loader";
@@ -25,6 +25,7 @@ export default function Home({ socket }: { socket: Socket }) {
     useState(false);
   const [alert, setAlert] = useState<AlertType>();
   const [userDetails, setUserDetails] = useState<UserDetails>();
+  const [poststype, setPostsType] = useState("allposts");
 
   useEffect(() => {
     const jwt = cookieCutter.get("jwt");
@@ -64,33 +65,66 @@ export default function Home({ socket }: { socket: Socket }) {
 
     // Getting posts
     const getPosts = () => {
-      Axios(jwt)
-        .get(`${process.env.STRAPI_URL}/api/posts`, {
-          params: {
-            populate: [
-              "author.profilepic",
-              "author.posts",
-              "content",
-              "comments",
-              "comments.author",
-              "comments.author.profilepic",
-              "hearts",
-              "hearts.profilepic",
-            ],
-            sort: ["createdAt:desc"],
-          },
-        })
-        .then((res) => {
-          console.log("posts", res.data.data);
-          if (res.data.data !== null) {
-            setPosts(CleanPostResponseArray(res.data.data));
-            setIsLoading(false);
-          }
-        })
-        .catch((err) => console.log(err));
+      if (poststype === "allposts") {
+        Axios(jwt)
+          .get(`${process.env.STRAPI_URL}/api/posts`, {
+            params: {
+              populate: [
+                "author.profilepic",
+                "author.posts",
+                "content",
+                "comments",
+                "comments.author",
+                "comments.author.profilepic",
+                "hearts",
+                "hearts.profilepic",
+              ],
+              sort: ["createdAt:desc"],
+            },
+          })
+          .then((res) => {
+            console.log("posts", res.data.data);
+            if (res.data.data !== null) {
+              setPosts(CleanPostResponseArray(res.data.data));
+              setIsLoading(false);
+            }
+          })
+          .catch((err) => console.log(err));
+      } else if (poststype === "followings") {
+        Axios(jwt)
+          .get(`${process.env.STRAPI_URL}/api/findfriendsposts`, {
+            params: {
+              populate: [
+                "author.profilepic",
+                "author.posts",
+                "content",
+                "comments",
+                "comments.author",
+                "comments.author.profilepic",
+                "hearts",
+                "hearts.profilepic",
+              ],
+              sort: ["createdAt:desc"],
+            },
+          })
+          .then((res) => {
+            console.log("posts", res.data);
+            if (res.data !== null && res.data.length !== 0) {
+              setPosts(CleanPostResponseArray(res.data));
+              setIsLoading(false);
+            }
+          })
+          .catch((err) => console.log(err));
+      }
     };
     getPosts();
-  }, []);
+  }, [poststype]);
+
+  const handlePostsTypeChange = (e: any) => {
+    console.log(e.target.value)
+    setPostsType(e.target.value);
+    setIsLoading(true);
+  };
 
   const changePostCardExtendedState = (state: boolean) => {
     setpostCardExtendedIsVisible(state);
@@ -129,6 +163,10 @@ export default function Home({ socket }: { socket: Socket }) {
                 user={userDetails}
               />
             )}
+            <select value={poststype} className="self-start px-5 py-3 bg-white font-semibold cursor-pointer text-gray-600" onChange={handlePostsTypeChange}>
+              <option value="allposts">All Posts</option>
+              <option value="followings">Followings</option>
+            </select>
             {posts &&
               posts.map((post: Post, index) => {
                 return <PostCard setAlert={setAlert} key={index} post={post} />;

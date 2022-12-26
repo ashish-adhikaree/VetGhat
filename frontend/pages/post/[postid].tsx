@@ -64,7 +64,7 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
     return () => {
       socket.removeAllListeners();
     };
-  }, [router]);
+  }, [router,socket]);
 
   const handleComment = (e: any) => {
     e.preventDefault();
