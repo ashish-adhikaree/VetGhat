@@ -185,7 +185,7 @@ export default function Home({ socket }: { socket: Socket }) {
             <select
               ref = {postTypeSelect}
               value={poststype}
-              className="self-start px-5 py-3 bg-white font-semibold cursor-pointer text-gray-600"
+              className="self-start px-5 py-3 bg-white font-semibold cursor-pointer text-gray-600 outline-none"
               onChange={handlePostsTypeChange}
             >
               <option value="allposts">All Posts</option>
