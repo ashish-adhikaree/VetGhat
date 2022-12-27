@@ -48,6 +48,13 @@ export default function App({ Component, pageProps }: AppProps) {
 
   if (socket)
     return (
+      <div>
+        <Head>
+          <title>VetGhat</title>
+          <meta name="description" content="Developed by Ashish" />
+          <link rel="icon" href="/vetghatlogo.png" />
+        </Head>
         <Component socket={socket} {...pageProps} key={router.asPath} />
+      </div>
     );
 }

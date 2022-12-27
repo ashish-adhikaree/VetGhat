@@ -27,11 +27,10 @@ export default function Home({ socket }: { socket: Socket }) {
   const [alert, setAlert] = useState<AlertType>();
   const [userDetails, setUserDetails] = useState<UserDetails>();
   const [poststype, setPostsType] = useState("allposts");
-  const postTypeSelect = useRef<any>()
-  const isFirstLoad = useRef(true)
+  const postTypeSelect = useRef<any>();
+  const isFirstLoad = useRef(true);
 
-
-  // Getting posts from user you follow 
+  // Getting posts from user you follow
   const getFollowingsPosts = () => {
     const jwt = cookieCutter.get("jwt");
     Axios(jwt)
@@ -90,55 +89,54 @@ export default function Home({ socket }: { socket: Socket }) {
   };
 
   const updatePosts = () => {
-    if (postTypeSelect.current?.value === "allposts"){
+    if (postTypeSelect.current?.value === "allposts") {
       getPosts();
-    }else if(postTypeSelect.current?.value === "followings"){
+    } else if (postTypeSelect.current?.value === "followings") {
       getFollowingsPosts();
     }
-  }
+  };
 
   useEffect(() => {
-    if (isFirstLoad.current){
+    if (isFirstLoad.current) {
       const jwt = cookieCutter.get("jwt");
 
-    setjwt(cookieCutter.get("jwt"));
+      setjwt(cookieCutter.get("jwt"));
 
-    // Getting users
-    Axios(jwt)
-      .get(`${process.env.STRAPI_URL}/api/users/me`, {
-        params: {
-          populate: [
-            "profilepic",
-            "posts",
-            "posts.content",
-            "posts.hearts",
-            "posts.comments",
-            "followers",
-            "followings",
-          ],
-        },
-      })
-      .then((res) => {
-        console.log("user", res.data);
-        setUserDetails(CleanUserDetailsResponse(res.data));
-      })
-      .catch((err) => console.log(err));
+      // Getting users
+      Axios(jwt)
+        .get(`${process.env.STRAPI_URL}/api/users/me`, {
+          params: {
+            populate: [
+              "profilepic",
+              "posts",
+              "posts.content",
+              "posts.hearts",
+              "posts.comments",
+              "followers",
+              "followings",
+            ],
+          },
+        })
+        .then((res) => {
+          console.log("user", res.data);
+          setUserDetails(CleanUserDetailsResponse(res.data));
+        })
+        .catch((err) => console.log(err));
 
+      getPosts();
+      getFollowingsPosts();
 
-    getPosts();
-    getFollowingsPosts();
-
-    //  wait until socket connects before adding event listeners
-    if (socket) {
-      socket.on("post:create",updatePosts );
-      socket.on("likesUpdated", updatePosts);
-      socket.on("comment:create", updatePosts);
+      //  wait until socket connects before adding event listeners
+      if (socket) {
+        socket.on("post:create", updatePosts);
+        socket.on("likesUpdated", updatePosts);
+        socket.on("comment:create", updatePosts);
+      }
     }
-    }
-    return ()=>{
-      isFirstLoad.current = false
-    }
-  },[]);
+    return () => {
+      isFirstLoad.current = false;
+    };
+  }, []);
 
   const handlePostsTypeChange = (e: any) => {
     setPostsType(e.target.value);
@@ -157,11 +155,6 @@ export default function Home({ socket }: { socket: Socket }) {
             postCardExtendedIsVisible ? "h-screen" : ""
           }`}
         >
-          <Head>
-            <title>VetGhat</title>
-            <meta name="description" content="Developed by Ashish" />
-            <link rel="icon" href="/favicon.ico" />
-          </Head>
           {alert && (
             <div>
               <GlobalAlert type={alert.type} body={alert.body} />
@@ -182,7 +175,7 @@ export default function Home({ socket }: { socket: Socket }) {
               />
             )}
             <select
-              ref = {postTypeSelect}
+              ref={postTypeSelect}
               value={poststype}
               className="self-start px-5 py-3 bg-white font-semibold cursor-pointer text-gray-600 outline-none"
               onChange={handlePostsTypeChange}
@@ -190,7 +183,8 @@ export default function Home({ socket }: { socket: Socket }) {
               <option value="allposts">All Posts</option>
               <option value="followings">Followings</option>
             </select>
-            {poststype==="allposts" && posts &&
+            {poststype === "allposts" &&
+              posts &&
               posts.map((post: Post, index) => {
                 return (
                   <PostCard
@@ -201,17 +195,18 @@ export default function Home({ socket }: { socket: Socket }) {
                   />
                 );
               })}
-            {poststype==="followings" && followingsPosts &&
-            followingsPosts.map((post: Post, index) => {
-              return (
-                <PostCard
-                  socket={socket}
-                  setAlert={setAlert}
-                  key={index}
-                  post={post}
-                />
-              );
-            })}
+            {poststype === "followings" &&
+              followingsPosts &&
+              followingsPosts.map((post: Post, index) => {
+                return (
+                  <PostCard
+                    socket={socket}
+                    setAlert={setAlert}
+                    key={index}
+                    post={post}
+                  />
+                );
+              })}
           </div>
           <RightSidebar />
         </div>
