@@ -151,7 +151,6 @@ export default function Home({ socket }: { socket: Socket }) {
   if (isLoading) return <Loader />;
   return (
     <Layout>
-      {poststype}
       {userDetails && (
         <div
           className={`min-h-screen flex justify-center ${

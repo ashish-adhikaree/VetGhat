@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import cookieCutter from "cookie-cutter";
 import { Socket } from "socket.io-client";
 import { Router, useRouter } from "next/router";
-import  NProgress  from "nprogress";
+import NProgress from "nprogress";
 import Head from "next/head";
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -13,6 +13,8 @@ export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
   useEffect(() => {
+    NProgress.configure({ showSpinner: false });
+
     Router.events.on("routeChangeStart", () => {
       NProgress.start();
     });
@@ -46,17 +48,6 @@ export default function App({ Component, pageProps }: AppProps) {
 
   if (socket)
     return (
-      <div>
-        <Head>
-          <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css"
-            integrity="sha512-42kB9yDlYiCEfx2xVwq0q7hT4uf26FUgSIZBK8uiaEnTdShXjwr8Ip1V4xGJMg3mHkUt9nNuTDxunHF0/EgxLQ=="
-            crossOrigin="anonymous"
-            referrerPolicy="no-referrer"
-          />
-        </Head>
         <Component socket={socket} {...pageProps} key={router.asPath} />
-      </div>
     );
 }

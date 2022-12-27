@@ -108,7 +108,7 @@ export const CleanUserDetailsResponse = (user: any) => {
             url: "/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z",
           }
         : { url: user.profilepic.url },
-    followersCount: user.followers.length,
+    followersCount: user.followers? user.followers.length : 0
   };
 
   return temp;
