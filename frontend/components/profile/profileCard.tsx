@@ -6,6 +6,9 @@ import Axios from "../../axios";
 import { Socket } from "socket.io-client";
 import UserList from "./userList";
 import { useRouter } from "next/router";
+import { BiEdit } from "react-icons/bi";
+import { FaCamera } from "react-icons/fa";
+import EditProfileCard from "./editCard";
 
 const ProfileCard = ({
   user,
@@ -22,7 +25,8 @@ const ProfileCard = ({
   const [followersCardState, setFollowersCardState] = useState<boolean>(false);
   const [followingsCardState, setFollowingsCardState] =
     useState<boolean>(false);
-  const router = useRouter()
+  const router = useRouter();
+  const [editingInProgress, setEditingInProgress] = useState<boolean>(false);
 
   const switchCardState = (type: string) => {
     if (type.toLowerCase() === "followers") {
@@ -70,7 +74,7 @@ const ProfileCard = ({
   };
 
   useEffect(() => {
-    setHasFollowed(false)
+    setHasFollowed(false);
     setUID(cookieCutter.get("uid"));
     setJWT(cookieCutter.get("jwt"));
     if (user.followers) {
@@ -82,16 +86,28 @@ const ProfileCard = ({
     }
   }, [user, router]);
 
+
   return (
     <div className="flex items-center mt-10">
+      {editingInProgress && (
+        <EditProfileCard user={user} setEditingInProgress={setEditingInProgress} jwt={jwt} socket={socket}/>
+      )}
       {followersCardState && (
-        <UserList switchCardState={setFollowersCardState} type="followers" users={user.followers}/>
+        <UserList
+          switchCardState={setFollowersCardState}
+          type="followers"
+          users={user.followers}
+        />
       )}
       {followingsCardState && (
-        <UserList switchCardState={setFollowingsCardState} type="followings" users={user.followings}/>
+        <UserList
+          switchCardState={setFollowingsCardState}
+          type="followings"
+          users={user.followings}
+        />
       )}
       <Image
-        className="rounded-full mr-5"
+        className="rounded-full mr-5 h-40 w-40"
         alt="profile-pic"
         width={150}
         height={150}
@@ -100,7 +116,16 @@ const ProfileCard = ({
       />
       <div className="space-y-5 bg-white p-5 md:p-10 rounded-md">
         <div className="flex items-center space-x-5">
-          <p className="text-xl font-bold text-gray-700">{user.username}</p>
+          <div className="text-xl font-bold text-gray-700">{user.username}</div>
+          {isUser && (
+            <button
+              onClick={() => {
+                setEditingInProgress(true);
+              }}
+            >
+              <BiEdit className="text-2xl text-gray-500" />
+            </button>
+          )}
           <div className="w-[100px]">
             {!isUser && !hasFollowed && (
               <button

@@ -3,7 +3,7 @@ module.exports = (plugin) => {
   for (let i = 0; i < plugin.routes["content-api"].routes.length; i++) {
     const route = plugin.routes["content-api"].routes[i];
     if (
-      route.method === "POST" &&
+      route.method === "PUT" &&
       route.path === "/users/:id" &&
       route.handler === "user.update"
     ) {
