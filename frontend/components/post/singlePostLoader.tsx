@@ -4,7 +4,7 @@ import Layout from "../Layout/layout";
 const SinglePostLoader = () => {
   return (
     <Layout>
-      <div className="h-[80vh] flex bg-white m-5 space-x-5 ">
+      <div className="h-[80vh] flex flex-col md:flex-row bg-white m-5 space-x-5 ">
         <Head>
           <title>Post-VetGhat</title>
           <meta name="description" content="Developed by Ashish" />

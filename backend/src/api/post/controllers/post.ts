@@ -15,7 +15,7 @@ export default factories.createCoreController(
       let response = []
       let followings = []
       try {
-        const user = await axios.get("http://localhost:1337/api/users/me", {
+        const user = await axios.get(`${process.env.STRAPI_URL}/api/users/me`, {
           params: {
             populate: ["followings"],
           },
@@ -27,7 +27,7 @@ export default factories.createCoreController(
       } catch (err) {
         console.log(err);
       }
-      
+      // console.log(await strapi.db.query('api::post.post').findMany({where:{author: 1}}))
       posts.data.forEach((post)=>{
         if (followings.includes(post.attributes.author.data.id)){
           response.push(post)

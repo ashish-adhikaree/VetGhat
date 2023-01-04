@@ -1,7 +1,14 @@
 import UserAvatar from "../reusables/userAvatar";
 import Image from "next/image";
 import { BiComment } from "react-icons/bi";
-import { AiOutlineSend, AiOutlineHeart, AiFillHeart } from "react-icons/ai";
+import {
+  AiOutlineSend,
+  AiOutlineHeart,
+  AiFillHeart,
+  AiFillDelete,
+  AiFillCopy,
+} from "react-icons/ai";
+import { FiMoreHorizontal } from "react-icons/fi";
 import { Post } from "../../typedeclaration";
 import { GetTimeDifference } from "../../helper_functions/getTimeDifference";
 import ImageCarousel from "./imageCarousel";
@@ -13,13 +20,23 @@ import CommentCard from "./commentCard";
 import HeartCard from "./heartCard";
 import { useRouter } from "next/router";
 import { Socket } from "socket.io-client";
-const PostCard = ({ post, setAlert, socket }: { post: Post; setAlert: any, socket:Socket }) => {
+const PostCard = ({
+  post,
+  setAlert,
+  socket,
+}: {
+  post: Post;
+  setAlert: any;
+  socket: Socket;
+}) => {
   const comment = useRef<HTMLInputElement>(null);
   const [jwt, setjwt] = useState("");
   const [uid, setuid] = useState("");
   const [showComments, setShowComments] = useState(false);
   const [showHearts, setShowHearts] = useState(false);
   const [loved, setLoved] = useState<boolean>();
+  const [postActionOpened, setPostActionOpened] = useState<boolean>(false);
+  const [isDeleteBoxVisible, setDeleteBoxVisibility] = useState<boolean>(false);
 
   useEffect(() => {
     const jwt = cookieCutter.get("jwt");
@@ -67,7 +84,7 @@ const PostCard = ({ post, setAlert, socket }: { post: Post; setAlert: any, socke
       Axios(jwt).put(`${process.env.STRAPI_URL}/api/users/${uid}`, {
         likedPosts: updatedLikedPosts,
       });
-      socket.emit("updateLikes","likesUpdated")
+      socket.emit("updateLikes", "likesUpdated");
     } catch (err) {
       console.log(err);
     }
@@ -105,8 +122,62 @@ const PostCard = ({ post, setAlert, socket }: { post: Post; setAlert: any, socke
     }
   };
 
+  const copyLink = () => {
+    navigator.clipboard.writeText(`${process.env.SITE_URL}/post/${post.id}`);
+    setAlert({
+      type: "success",
+      body: "Post Link Copied to Clipboard",
+    });
+    setInterval(() => {
+      setAlert(undefined);
+    }, 3000);
+  };
+  const handleDelete = () => {
+    Axios(jwt)
+      .delete(`${process.env.STRAPI_URL}/api/posts/${post.id}`)
+      .then((res) => {
+        setAlert({
+          type: "success",
+          body: "Post Deleted Successfully",
+        });
+        setInterval(() => {
+          setAlert(undefined);
+        }, 3000);
+      })
+      .catch((err) => {
+        setAlert({
+          type: "error",
+          body: "Could not Delete the Post",
+        });
+        setInterval(() => {
+          setAlert(undefined);
+        }, 3000);
+      });
+    setDeleteBoxVisibility(false);
+  };
+
   return (
-    <div className="bg-white w-full space-y-3 relative">
+    <div className="bg-white w-full relative">
+      {isDeleteBoxVisible && (
+        <div className="absolute bg-gray-200 bg-opacity-50 h-full w-full flex items-center justify-center">
+          <div className="bg-white p-5 flex flex-col space-y-5">
+            <p> Are you sure you want to delete this post</p>
+            <div className="space-x-3 self-end">
+              <button className="bg-red-400 px-3 py-2" onClick={handleDelete}>
+                Confirm
+              </button>
+              <button
+                className="bg-gray-200 px-3 py-2"
+                onClick={() => {
+                  setDeleteBoxVisibility(false);
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {showComments && (
         <CommentCard
           showCommentCard={setShowComments}
@@ -122,7 +193,7 @@ const PostCard = ({ post, setAlert, socket }: { post: Post; setAlert: any, socke
       )}
       <div className="flex items-center space-x-5 p-5">
         <UserAvatar src={post.author.profilepic.url} />
-        <div className="">
+        <div className="flex-grow">
           <Link
             as={`/profile/${post.author.id}`}
             href={`/profile/${post.author.id}`}
@@ -131,6 +202,36 @@ const PostCard = ({ post, setAlert, socket }: { post: Post; setAlert: any, socke
             {post.author.username}
           </Link>
         </div>
+        {parseInt(uid) === post.author.id && (
+          <div>
+            <FiMoreHorizontal
+              className="cursor-pointer"
+              onClick={() => {
+                setPostActionOpened(!postActionOpened);
+              }}
+            />
+            {postActionOpened && (
+              <div className="absolute bg-gray-100 right-5 p-3 flex flex-col justify-start space-y-3 text-gray-600">
+                <button
+                  className="flex items-center space-x-2"
+                  onClick={() => {
+                    setDeleteBoxVisibility(true);
+                  }}
+                >
+                  <AiFillDelete />
+                  <p>Delete</p>
+                </button>
+                <button
+                  className="flex items-center space-x-2"
+                  onClick={copyLink}
+                >
+                  <AiFillCopy />
+                  <p>Copy Link</p>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
       {post.content.length > 1 ? (
         <ImageCarousel link={`/post/${post.id}`} images={post.content} />
@@ -149,7 +250,7 @@ const PostCard = ({ post, setAlert, socket }: { post: Post; setAlert: any, socke
           </div>
         </Link>
       )}
-      <div className="h-10 flex items-center space-x-4 px-5">
+      <div className="h-10 flex items-center space-x-4 px-5 pt-2">
         <div className="postcard-icon-container" onClick={handleLove}>
           {loved ? (
             <AiFillHeart className="postcard-icon text-red-500" />
@@ -214,7 +315,7 @@ const PostCard = ({ post, setAlert, socket }: { post: Post; setAlert: any, socke
             : `all ${post.commentcount} comments`}
         </div>
       )}
-      <p className="text-gray-400 px-5 uppercase text-sm">
+      <p className="text-gray-400 px-5 uppercase text-sm py-2">
         {GetTimeDifference(post.postedAt)}
       </p>
       <form className="flex items-center px-5 border-t py-5">

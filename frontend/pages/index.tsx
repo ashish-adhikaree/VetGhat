@@ -29,9 +29,11 @@ export default function Home({ socket }: { socket: Socket }) {
   const [poststype, setPostsType] = useState("allposts");
   const postTypeSelect = useRef<any>();
   const isFirstLoad = useRef(true);
+  const [page, setPage] = useState(1);
+  const [pageCount, setPageCount] = useState(1);
 
   // Getting posts from user you follow
-  const getFollowingsPosts = () => {
+  const getFollowingsPosts = (page:number) => {
     const jwt = cookieCutter.get("jwt");
     Axios(jwt)
       .get(`${process.env.STRAPI_URL}/api/findfriendsposts`, {
@@ -60,11 +62,13 @@ export default function Home({ socket }: { socket: Socket }) {
   };
 
   // Getting posts
-  const getPosts = () => {
+  const getPosts = (page:number) => {
+    console.log("pagenumber", page)
     const jwt = cookieCutter.get("jwt");
     Axios(jwt)
       .get(`${process.env.STRAPI_URL}/api/posts`, {
         params: {
+          pagination: { page: page },
           populate: [
             "author.profilepic",
             "author.posts",
@@ -79,6 +83,8 @@ export default function Home({ socket }: { socket: Socket }) {
         },
       })
       .then((res) => {
+        setPageCount(res.data.meta.pagination.pageCount);
+        console.log(res);
         console.log("posts", res.data.data);
         if (res.data.data !== null) {
           setPosts(CleanPostResponseArray(res.data.data));
@@ -88,11 +94,11 @@ export default function Home({ socket }: { socket: Socket }) {
       .catch((err) => console.log(err));
   };
 
-  const updatePosts = () => {
+  const updatePosts = (page:number) => {
     if (postTypeSelect.current?.value === "allposts") {
-      getPosts();
+      getPosts(page);
     } else if (postTypeSelect.current?.value === "followings") {
-      getFollowingsPosts();
+      getFollowingsPosts(page);
     }
   };
 
@@ -123,20 +129,31 @@ export default function Home({ socket }: { socket: Socket }) {
         })
         .catch((err) => console.log(err));
 
-      getPosts();
-      getFollowingsPosts();
+      getPosts(page);
+      getFollowingsPosts(page);
 
       //  wait until socket connects before adding event listeners
       if (socket) {
-        socket.on("post:create", updatePosts);
-        socket.on("likesUpdated", updatePosts);
-        socket.on("comment:create", updatePosts);
+        socket.on("post:create", ()=>{updatePosts(page)});
+        socket.on("likesUpdated", ()=>{updatePosts(page)});
+        socket.on("comment:create", ()=>{updatePosts(page)});
+        socket.on("post:delete", ()=>{updatePosts(page)})
       }
     }
     return () => {
       isFirstLoad.current = false;
     };
   }, []);
+
+  const handlePrev = () => {
+    setPage(page - 1);
+    updatePosts(page-1);
+  };
+
+  const handleNext = () => {
+    setPage(page + 1);
+    updatePosts(page+1);
+  };
 
   const handlePostsTypeChange = (e: any) => {
     setPostsType(e.target.value);
@@ -207,6 +224,14 @@ export default function Home({ socket }: { socket: Socket }) {
                   />
                 );
               })}
+            {pageCount > 1 && (
+              <div>
+                {page !== 1 && <button className="px-4 py-2 bg-gray-800 m-5 text-white"  onClick={handlePrev}>Prev</button>}
+                {page !== pageCount && (
+                  <button className="px-4 py-2 bg-gray-800 m-5 text-white" onClick={handleNext}>Next</button>
+                )}
+              </div>
+            )}
           </div>
           <RightSidebar />
         </div>

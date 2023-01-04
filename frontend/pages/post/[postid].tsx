@@ -10,13 +10,20 @@ import UserAvatar from "../../components/reusables/userAvatar";
 import Link from "next/link";
 import { GetTimeDifference } from "../../helper_functions/getTimeDifference";
 import ImageCarousel from "../../components/post/imageCarousel";
-import { AiFillHeart, AiOutlineHeart, AiOutlineSend } from "react-icons/ai";
+import {
+  AiFillCopy,
+  AiFillDelete,
+  AiFillHeart,
+  AiOutlineHeart,
+  AiOutlineSend,
+} from "react-icons/ai";
 import Comment from "../../components/post/comment";
 import Head from "next/head";
 import SinglePostLoader from "../../components/post/singlePostLoader";
 import GlobalAlert from "../../components/alert/globalalert";
 import { Socket } from "socket.io-client";
 import HeartCard from "../../components/post/heartCard";
+import { FiMoreHorizontal } from "react-icons/fi";
 
 const SinglePost = ({ socket }: { socket: Socket }) => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -28,6 +35,8 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
   const [loved, setLoved] = useState(false);
   const [uid, setUID] = useState<string>("");
   const [showHearts, setShowHearts] = useState(false);
+  const [postActionOpened, setPostActionOpened] = useState<boolean>(false);
+  const [isDeleteBoxVisible, setDeleteBoxVisibility] = useState<boolean>(false);
 
   useEffect(() => {
     if (router.query.postid) {
@@ -128,7 +137,7 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
           },
         }
       );
-      res.data.likedPosts.map((post: any) => post.id);
+      yourLikedPosts = res.data.likedPosts.map((post: any) => post.id);
     } catch (err) {
       console.log(err);
     }
@@ -156,9 +165,45 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
     }
   };
 
+  const copyLink = () => {
+    navigator.clipboard.writeText(`${process.env.SITE_URL}/post/${post?.id}`);
+    setAlert({
+      type: "success",
+      body: "Post Link Copied to Clipboard",
+    });
+    setInterval(() => {
+      setAlert(undefined);
+    }, 3000);
+  };
+
+  const handleDelete = () => {
+    Axios(jwt)
+      .delete(`${process.env.STRAPI_URL}/api/posts/${post?.id}`)
+      .then((res) => {
+        setAlert({
+          type: "success",
+          body: "Post Deleted Successfully",
+        });
+        setInterval(() => {
+          setAlert(undefined);
+        }, 3000);
+      })
+      .catch((err) => {
+        setAlert({
+          type: "error",
+          body: "Could not Delete the Post",
+        });
+        setInterval(() => {
+          setAlert(undefined);
+        }, 3000);
+      });
+    setDeleteBoxVisibility(false);
+  };
+
   if (loading) {
     return <SinglePostLoader />;
   }
+
   return (
     <Layout>
       {post && (
@@ -169,6 +214,29 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
             <link rel="icon" href="/favicon.ico" />
           </Head>
           <div className="overflow-hidden h-[400px] md:h-full w-full md:w-1/2 bg-black">
+            {isDeleteBoxVisible && (
+              <div className="absolute bg-gray-200 bg-opacity-50 h-full w-full flex items-center justify-center z-[20]">
+                <div className="bg-white p-5 flex flex-col space-y-5">
+                  <p> Are you sure you want to delete this post</p>
+                  <div className="space-x-3 self-end">
+                    <button
+                      className="bg-red-400 px-3 py-2 cursor-pointer"
+                      onClick={handleDelete}
+                    >
+                      Confirm
+                    </button>
+                    <button
+                      className="bg-gray-200 px-3 py-2 cursor-pointer"
+                      onClick={() => {
+                        setDeleteBoxVisibility(false);
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             {post.content.length > 1 ? (
               <ImageCarousel singlePost={true} images={post.content} />
             ) : (
@@ -194,7 +262,7 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
             <div className="p-5 space-y-5">
               <div className="flex items-center space-x-5 flex-grow p-3 border-b">
                 <UserAvatar src={post.author.profilepic.url} />
-                <div className="">
+                <div className="flex-grow">
                   <Link
                     as={`/profile/${post.author.id}`}
                     href={`/profile/${post.author.id}`}
@@ -203,6 +271,36 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
                     {post.author.username}
                   </Link>
                 </div>
+                {parseInt(uid) === post.author.id && (
+                  <div>
+                    <FiMoreHorizontal
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setPostActionOpened(!postActionOpened);
+                      }}
+                    />
+                    {postActionOpened && (
+                      <div className="absolute bg-gray-100 right-5 p-3 flex flex-col justify-start space-y-3 text-gray-600">
+                        <button
+                          className="flex items-center space-x-2 cursor-pointer"
+                          onClick={() => {
+                            setDeleteBoxVisibility(true);
+                          }}
+                        >
+                          <AiFillDelete />
+                          <p>Delete</p>
+                        </button>
+                        <button
+                          className="flex items-center space-x-2 cursor-pointer"
+                          onClick={copyLink}
+                        >
+                          <AiFillCopy />
+                          <p>Copy Link</p>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="px-5 flex items-center space-x-3">

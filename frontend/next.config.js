@@ -21,6 +21,7 @@ const nextConfig = {
   },
   env: {
     STRAPI_URL: process.env.STRAPI_URL,
+    SITE_URL: process.env.SITE_URL
   },
 };
 
