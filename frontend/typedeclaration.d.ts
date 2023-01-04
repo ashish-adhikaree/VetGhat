@@ -73,3 +73,10 @@ export interface PostFormData{
     caption?: string
     files: any[]
 }
+
+// search user 
+export interface searchUser{
+    id: number,
+    username: string,
+    profilepic: ImageType
+}

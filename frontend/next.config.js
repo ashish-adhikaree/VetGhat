@@ -5,15 +5,23 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '1337',
+        protocol: "http",
+        hostname: "localhost",
+        port: "1337",
+      },
+      {
+        protocol: "https",
+        hostname: "assets-cdn.kantipurdaily.com",
+      },
+      {
+        protocol: "https",
+        hostname: "assets-cdn-api.kantipurdaily.com",
       },
     ],
   },
-  env:{
-    STRAPI_URL: process.env.STRAPI_URL
-  }
-}
+  env: {
+    STRAPI_URL: process.env.STRAPI_URL,
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

@@ -42,6 +42,7 @@ export default function App({ Component, pageProps }: AppProps) {
       });
       return () => {
         isSocketPresent.current = true;
+        socket?.disconnect()
       };
     }
   }, []);

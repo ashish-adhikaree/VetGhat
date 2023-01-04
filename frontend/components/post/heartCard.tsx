@@ -14,7 +14,7 @@ const HeartCard = ({
 }) => {
   return (
     <div className="h-full w-full overflow-y-scroll scrollbar-none absolute top-0 bottom-0 left-0 right-0 bg-white z-[100]">
-      <div className="w-full border-b text-center p-3 font-semibold flex items-center">
+      <div className="sticky top-0 bg-white w-full border-b text-center p-3 font-semibold flex items-center">
         <BiArrowBack
           className="text-xl cursor-pointer"
           onClick={() => {
