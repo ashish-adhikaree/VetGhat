@@ -19,8 +19,7 @@ const PostCard = ({ post, setAlert, socket }: { post: Post; setAlert: any, socke
   const [uid, setuid] = useState("");
   const [showComments, setShowComments] = useState(false);
   const [showHearts, setShowHearts] = useState(false);
-  const [loved, setLoved] = useState(false);
-  const router = useRouter();
+  const [loved, setLoved] = useState<boolean>();
 
   useEffect(() => {
     const jwt = cookieCutter.get("jwt");
@@ -48,7 +47,7 @@ const PostCard = ({ post, setAlert, socket }: { post: Post; setAlert: any, socke
           },
         }
       );
-      res.data.likedPosts.map((post: any) => post.id);
+      yourLikedPosts = res.data.likedPosts.map((post: any) => post.id);
     } catch (err) {
       console.log(err);
     }
