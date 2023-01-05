@@ -64,21 +64,23 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
           })
           .then((res) => {
             console.log(res);
-            setPost(CleanPostResponse(res.data.data));
+            const post_temp = CleanPostResponse(res.data.data)
+            setPost(post_temp);
+            if (post_temp) {
+              if (post_temp.hearts.length !== 0) {
+                post_temp.hearts.map((user) => {
+                  if (user.id.toString() === cookieCutter.get("uid")) {
+                    setLoved(true);
+                  }
+                });
+              }
+            }
             setLoading(false);
           })
           .catch((err) => console.log(err));
       };
       getPost();
-      if (post) {
-        if (post.hearts.length !== 0) {
-          post.hearts.map((user) => {
-            if (user.id.toString() === cookieCutter.get("uid")) {
-              setLoved(true);
-            }
-          });
-        }
-      }
+      
 
       socket.on("comment:create", () => {
         getPost();
@@ -198,6 +200,7 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
         }, 3000);
       });
     setDeleteBoxVisibility(false);
+    setPostActionOpened(false)
   };
 
   if (loading) {
@@ -271,16 +274,17 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
                     {post.author.username}
                   </Link>
                 </div>
-                {parseInt(uid) === post.author.id && (
-                  <div>
-                    <FiMoreHorizontal
-                      className="cursor-pointer"
-                      onClick={() => {
-                        setPostActionOpened(!postActionOpened);
-                      }}
-                    />
-                    {postActionOpened && (
-                      <div className="absolute bg-gray-100 right-5 p-3 flex flex-col justify-start space-y-3 text-gray-600">
+
+                <div>
+                  <FiMoreHorizontal
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setPostActionOpened(!postActionOpened);
+                    }}
+                  />
+                  {postActionOpened && (
+                    <div className="absolute bg-gray-100 right-5 p-3 flex flex-col justify-start space-y-3 text-gray-600">
+                      {parseInt(uid) === post.author.id && (
                         <button
                           className="flex items-center space-x-2 cursor-pointer"
                           onClick={() => {
@@ -290,27 +294,29 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
                           <AiFillDelete />
                           <p>Delete</p>
                         </button>
-                        <button
-                          className="flex items-center space-x-2 cursor-pointer"
-                          onClick={copyLink}
-                        >
-                          <AiFillCopy />
-                          <p>Copy Link</p>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
+                      )}
+                      <button
+                        className="flex items-center space-x-2 cursor-pointer"
+                        onClick={copyLink}
+                      >
+                        <AiFillCopy />
+                        <p>Copy Link</p>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="px-5 flex items-center space-x-3">
+                <div className="h-[40px] w-[40px]">
                 <Image
-                  className="rounded-full"
+                  className="rounded-full w-full h-full object-cover"
                   width={40}
                   height={40}
                   alt={`${post.author.username}-profilepic`}
-                  src={process.env.STRAPI_URL + post.author.profilepic.url}
+                  src={post.author.profilepic.url}
                 />
+                </div>
                 <div>
                   <span className="font-semibold pr-3 text-blue-500">
                     {post.author.username}

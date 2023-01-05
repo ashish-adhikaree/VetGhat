@@ -8,12 +8,10 @@ import axios from "axios";
 export default factories.createCoreController(
   "api::post.post",
   ({ strapi }): {} => ({
-    async findFriendsPosts(
-      ctx: any
-    ): Promise<any[]> {
+    async findFriendsPosts(ctx: any): Promise<any[]> {
       const posts = await super.find(ctx);
-      let response = []
-      let followings = []
+      let response = [];
+      let followings = [];
       try {
         const user = await axios.get(`${process.env.STRAPI_URL}/api/users/me`, {
           params: {
@@ -27,12 +25,11 @@ export default factories.createCoreController(
       } catch (err) {
         console.log(err);
       }
-      // console.log(await strapi.db.query('api::post.post').findMany({where:{author: 1}}))
-      posts.data.forEach((post)=>{
-        if (followings.includes(post.attributes.author.data.id)){
-          response.push(post)
+      posts.data.forEach((post) => {
+        if (followings.includes(post.attributes.author.data.id)) {
+          response.push(post);
         }
-      })
+      });
       return response;
     },
     async find(
@@ -40,6 +37,20 @@ export default factories.createCoreController(
     ): Promise<content_schemas.ResponseCollection<"api::post.post">> {
       const response = await super.find(ctx);
       return response;
+    },
+
+    async delete(ctx: any): Promise<any> {
+      const postid = ctx.url.split("/")[3];
+      const post = await strapi.db
+        .query("api::post.post")
+        .findOne({ populate: ["author", "content"], where: { id: postid } });
+      if (post.author.id === ctx.state.user.id) {
+        console.log("Yes you are author");
+        return await super.delete(ctx);
+      } else {
+        ctx.response.status = 404
+        ctx.response.message = 'Only Author can delete the post'
+      }
     },
 
     async create(

@@ -72,7 +72,7 @@ const SearchBar = () => {
               search_suggestion.map((user: searchUser, index) => {
                 return (
                   <div key={index} className="flex items-center p-3 space-x-3 hover:bg-white">
-                    <Image className="rounded-full" height={40} width={40} alt={`${user.username}'s profilepic`} src={process.env.STRAPI_URL + user.profilepic.url}/>
+                    <Image className="rounded-full" height={40} width={40} alt={`${user.username}'s profilepic`} src={user.profilepic.url} priority={true}/>
                     <Link className="hover:underline" as={`/profile/${user.id}`} href={`/profile/${user.id}`}>{user.username}</Link>
                   </div>
                 );

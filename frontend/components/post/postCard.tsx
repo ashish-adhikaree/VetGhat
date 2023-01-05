@@ -154,12 +154,13 @@ const PostCard = ({
         }, 3000);
       });
     setDeleteBoxVisibility(false);
+    setPostActionOpened(false)
   };
 
   return (
     <div className="bg-white w-full relative">
       {isDeleteBoxVisible && (
-        <div className="absolute bg-gray-200 bg-opacity-50 h-full w-full flex items-center justify-center">
+        <div className="absolute bg-gray-200 bg-opacity-50 h-full w-full flex items-center justify-center z-[20]">
           <div className="bg-white p-5 flex flex-col space-y-5">
             <p> Are you sure you want to delete this post</p>
             <div className="space-x-3 self-end">
@@ -202,16 +203,16 @@ const PostCard = ({
             {post.author.username}
           </Link>
         </div>
-        {parseInt(uid) === post.author.id && (
-          <div>
-            <FiMoreHorizontal
-              className="cursor-pointer"
-              onClick={() => {
-                setPostActionOpened(!postActionOpened);
-              }}
-            />
-            {postActionOpened && (
-              <div className="absolute bg-gray-100 right-5 p-3 flex flex-col justify-start space-y-3 text-gray-600">
+        <div>
+          <FiMoreHorizontal
+            className="cursor-pointer"
+            onClick={() => {
+              setPostActionOpened(!postActionOpened);
+            }}
+          />
+          {postActionOpened && (
+            <div className="absolute bg-gray-100 right-5 p-3 flex flex-col justify-start space-y-3 text-gray-600 z-[20]">
+              {parseInt(uid) === post.author.id && (
                 <button
                   className="flex items-center space-x-2"
                   onClick={() => {
@@ -221,17 +222,17 @@ const PostCard = ({
                   <AiFillDelete />
                   <p>Delete</p>
                 </button>
-                <button
-                  className="flex items-center space-x-2"
-                  onClick={copyLink}
-                >
-                  <AiFillCopy />
-                  <p>Copy Link</p>
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+              )}
+              <button
+                className="flex items-center space-x-2"
+                onClick={copyLink}
+              >
+                <AiFillCopy />
+                <p>Copy Link</p>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       {post.content.length > 1 ? (
         <ImageCarousel link={`/post/${post.id}`} images={post.content} />
@@ -264,7 +265,7 @@ const PostCard = ({
       </div>
       {post.heartcount > 0 && (
         <div
-          className="px-5 cursor-pointer hover:underline"
+          className="px-5 cursor-pointer hover:underline py-2"
           onClick={() => {
             setShowHearts(true);
           }}
@@ -297,7 +298,7 @@ const PostCard = ({
         </div>
       )}
       {post.caption && (
-        <div className="px-5 space-x-3 w-full truncate">
+        <div className="px-5 space-x-3 w-full truncate py-2">
           <span className="font-bold">{post.author.username}</span>
           <span>{post.caption}</span>
         </div>

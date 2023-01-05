@@ -106,14 +106,16 @@ const ProfileCard = ({
           users={user.followings}
         />
       )}
+      <div className="h-[150px] w-[150px] mr-5">
       <Image
-        className="rounded-full mr-5 h-40 w-40"
+        className="rounded-full w-full h-full object-cover"
         alt="profile-pic"
         width={150}
         height={150}
-        src={`${process.env.STRAPI_URL + user.profilepic.url}`}
+        src={user.profilepic.url}
         priority={true}
       />
+      </div>
       <div className="space-y-5 bg-white p-5 md:p-10 rounded-md">
         <div className="flex items-center space-x-5">
           <div className="text-xl font-bold text-gray-700">{user.username}</div>

@@ -69,7 +69,6 @@ export interface AlertType{
 
 // Post form Data 
 export interface PostFormData{
-    isPublic?: boolean,
     caption?: string
     files: any[]
 }

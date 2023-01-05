@@ -8,7 +8,7 @@ const EditProfileCard = ({ user, setEditingInProgress, jwt, socket }: any) => {
   const username = useRef<any>();
   const bio = useRef<any>();
   const [src, setSRC] = useState<string>(
-    `${process.env.STRAPI_URL + user.profilepic.url}`
+    user.profilepic.url
   );
   const [imageData, setImageData] = useState<any>();
 

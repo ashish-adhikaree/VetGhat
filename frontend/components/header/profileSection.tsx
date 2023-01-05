@@ -51,14 +51,16 @@ const ProfileSection = () => {
   return (
     <div>
       {userDetails && (
+        <div className="h-[40px] w-[40px]">
         <Image
-          className="rounded-full cursor-pointer relative"
+          className="rounded-full cursor-pointer relative w-full h-full object-cover"
           alt={`${userDetails.username}'s profilepic`}
-          src={process.env.STRAPI_URL + userDetails.profilepic.url}
+          src={userDetails.profilepic.url}
           height={35}
           width={35}
           onClick={handleClick}
         />
+        </div>
       )}
       {isDropdownVisible && (
         <div className="absolute right-5 bg-gray-200 m-3 p-5 font-semibold text-gray-500 space-y-3">

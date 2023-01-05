@@ -16,11 +16,11 @@ export const CleanPostResponse = (post: any) => {
       profilepic:
         post.attributes.author.data.attributes.profilepic.data !== null
           ? {
-              url: post.attributes.author.data.attributes.profilepic.data
+              url:  process.env.STRAPI_URL + post.attributes.author.data.attributes.profilepic.data
                 .attributes.url,
             }
           : {
-              url: "/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z",
+              url: "/defaultuser.jpg",
             },
     },
     caption: post.attributes.caption,
@@ -39,9 +39,9 @@ export const CleanPostResponse = (post: any) => {
             profilepic:
               user.attributes.profilepic.data === null
                 ? {
-                    url: "/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z",
+                    url: "/defaultuser.jpg",
                   }
-                : { url: user.attributes.profilepic.data.attributes.url },
+                : { url:  process.env.STRAPI_URL + user.attributes.profilepic.data.attributes.url },
           }))
         : [],
     comments:
@@ -88,9 +88,9 @@ export const CleanUserResponse = (user: any) => {
     username: user.data.attributes.username,
     profilepic:
       user.data.attributes.profilepic.data !== null
-        ? { url: user.data.attributes.profilepic.data.attributes.url }
+        ? { url:  process.env.STRAPI_URL + user.data.attributes.profilepic.data.attributes.url }
         : {
-            url: "/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z",
+            url: "/defaultuser.jpg",
           },
     followersCount:
       user.data.attributes.followers &&
@@ -111,9 +111,9 @@ export const CleanUserDetailsResponse = (user: any) => {
     profilepic:
       user.profilepic === null
         ? {
-            url: "/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z",
+            url: "/defaultuser.jpg",
           }
-        : { url: user.profilepic.url },
+        : { url:  process.env.STRAPI_URL + user.profilepic.url },
     followersCount: user.followers ? user.followers.length : 0,
   };
 
@@ -128,9 +128,9 @@ export const CleanProfileUserDetailsResponse = (user: any) => {
     profilepic:
       user.profilepic === null
         ? {
-            url: "/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z",
+            url: "/defaultuser.jpg",
           }
-        : { url: user.profilepic.url },
+        : { url:  process.env.STRAPI_URL + user.profilepic.url },
     followersCount: user.followers.length,
     followingCount: user.followings.length,
     postsCount: user.posts.length,
@@ -158,9 +158,9 @@ export const CleanFollowersFollowingsResponse = (user: any) => {
     profilepic:
       user.profilepic === null
         ? {
-            url: "/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z",
+            url: "/defaultuser.jpg",
           }
-        : { url: user.profilepic.url },
+        : { url:  process.env.STRAPI_URL + user.profilepic.url },
   };
   return temp;
 };
@@ -172,8 +172,8 @@ export const CleanStrapiUserSearchResponse = (data: any) => {
       username: user.username,
       profilepic: {
         url: user.profilepic
-          ? user.profilepic.url
-          : "/uploads/defaultpp_d6926772d7.png?updated_at=2022-12-15T15:46:23.248Z",
+          ? process.env.STRAPI_URL + user.profilepic.url
+          : "/defaultuser.jpg",
       },
     };
   });

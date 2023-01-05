@@ -18,7 +18,6 @@ const CreatePostCardExtended = ({
   setAlert: any
 }) => {
   const [formData, setFormData] = useState<PostFormData>({
-    isPublic: true,
     files: []
   });
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
@@ -46,9 +45,6 @@ const CreatePostCardExtended = ({
           ? [...formData.files, e.target.files[0]]
           : [e.target.files[0]],
       });
-    } else if (e.target.name === "isPublic") {
-      const temp = e.target.value === "true" ? true : false;
-      setFormData({ ...formData, [e.target.name]: temp });
     } else {
       setFormData({ ...formData, [e.target.name]: e.target.value });
     }
@@ -58,7 +54,6 @@ const CreatePostCardExtended = ({
     e.preventDefault();
     if (formData.files.length !== 0){
       const data = {
-        isPublic: formData.isPublic,
         caption: formData.caption,
       };
       const form = new FormData();
@@ -105,15 +100,6 @@ const CreatePostCardExtended = ({
           <UserAvatar src={user.profilepic.url} />
           <div>
             <p className="font-bold">{user.username}</p>
-            <select
-              className="outline-none font-bold text-sm text-gray-500 bg-black bg-opacity-10 hover:shadow-sm cursor-pointer rounded-md px-3 py-1"
-              name="isPublic"
-              id="audience"
-              onChange={handleInput}
-            >
-              <option value="true">&#127760; Public</option>
-              <option value="false">&#128274; Only Me</option>
-            </select>
           </div>
         </div>
         <div className="relative">
