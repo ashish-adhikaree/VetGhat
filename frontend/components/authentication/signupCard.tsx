@@ -7,9 +7,7 @@ import {
   AiOutlineEye,
   AiOutlineEyeInvisible,
 } from "react-icons/ai";
-import { createClient } from "../../apolloClient";
 import Axios from "../../axios";
-import { SignUp } from "../../lib/mutation";
 import { AlertType, LoginValue } from "../../typedeclaration";
 import Alert from "../alert/alert";
 
