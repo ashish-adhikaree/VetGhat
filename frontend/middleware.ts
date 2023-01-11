@@ -5,17 +5,17 @@ export default async function middleware(request: NextRequest){
     const cookie = request.cookies.get('jwt')?.value
     const requestHeaders = new Headers(request.headers)
     requestHeaders.set('authorization', `Bearer ${cookie}`)
-    const res = await fetch('http://localhost:1337/api/users/me',{
+    const res = await fetch(`${process.env.STRAPI_URL}/api/users/me`,{
         method: 'get',
         headers: {
             authorization: cookie ? `Bearer ${cookie}` : ''
           }
     })
-    // console.log(request.url)
-    if (res.status!==200 && request.url !== "http://localhost:3000/login"){
-        return NextResponse.redirect(new URL('http://localhost:3000/login'))
+  
+    if (res.status!==200 && request.url !== `${process.env.SITE_URL}/login`){
+        return NextResponse.redirect(new URL(`${process.env.SITE_URL}/login`))
     }else if(res.status === 200 && request.url.includes('/login')){
-        return NextResponse.redirect(new URL('http://localhost:3000'))
+        return NextResponse.redirect(new URL(process.env.SITE_URL || ""))
     }
 }
 export const config = {
