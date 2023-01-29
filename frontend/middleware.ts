@@ -11,7 +11,7 @@ export default async function middleware(request: NextRequest){
             authorization: cookie ? `Bearer ${cookie}` : ''
           }
     })
-  
+  console.log(process.env.SITE_URL)
     if (res.status!==200 && request.url !== `${process.env.SITE_URL}/login`){
         return NextResponse.redirect(new URL(`${process.env.SITE_URL}/login`))
     }else if(res.status === 200 && request.url.includes('/login')){
