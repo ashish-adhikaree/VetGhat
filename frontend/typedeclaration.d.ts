@@ -40,6 +40,7 @@ export interface ProfilePost{
 }
 
 export interface UserDetails{
+    pfpid: number,
     id: number,
     username: string,
     bio?: string,
@@ -48,6 +49,7 @@ export interface UserDetails{
     followingCount?: number,
     postsCount?: number,
     posts?: ProfilePost[],
+    likedPosts?: ProfilePost[],
     followers?: User[] | undefined,
     followings?: User[] | undefined,
 }

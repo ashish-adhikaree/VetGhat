@@ -2,23 +2,22 @@ import UserAvatar from "../reusables/userAvatar";
 import { GiCancel } from "react-icons/gi";
 import { HiOutlinePhotograph } from "react-icons/hi";
 import React, { useState } from "react";
-import {PostFormData, UserDetails } from "../../typedeclaration";
+import { PostFormData, UserDetails } from "../../typedeclaration";
 import Image from "next/image";
 import Axios from "../../axios";
 
-const CreatePostCardExtended = ({
-  closePostCardExtended,
-  jwt,
-  user,
-  setAlert
-}: {
+type PROPS = {
   closePostCardExtended: any;
-  jwt: string;
   user: UserDetails;
-  setAlert: any
+  setAlert: any;
+};
+const CreatePostCardExtended: React.FC<PROPS> = ({
+  closePostCardExtended,
+  user,
+  setAlert,
 }) => {
   const [formData, setFormData] = useState<PostFormData>({
-    files: []
+    files: [],
   });
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
 
@@ -52,17 +51,17 @@ const CreatePostCardExtended = ({
 
   const handleSubmit = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
-    if (formData.files.length !== 0){
+    if (formData.files.length !== 0) {
       const data = {
         caption: formData.caption,
       };
       const form = new FormData();
-      for (let i=0; i<formData.files?.length; i++){
-        form.append("files.content", formData.files[i])
+      for (let i = 0; i < formData.files?.length; i++) {
+        form.append("files.content", formData.files[i]);
       }
       form.append("data", JSON.stringify(data));
-  
-      Axios(jwt)
+
+      Axios()
         .post(`${process.env.STRAPI_URL}/api/posts`, form)
         .then((res) => {
           setAlert({
@@ -76,7 +75,7 @@ const CreatePostCardExtended = ({
         .catch((err) => console.log(err));
       closePostCardExtended(false);
       window.onscroll = () => {};
-    }else{
+    } else {
       setAlert({
         type: "error",
         body: "No images selected",

@@ -1,5 +1,6 @@
+import axios from "axios";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   AiOutlineMail,
   AiOutlineLock,
@@ -7,14 +8,14 @@ import {
   AiOutlineEyeInvisible,
 } from "react-icons/ai";
 
-import Axios from "../../axios";
-import { AlertType, LoginValue } from "../../typedeclaration";
+import { AlertType } from "../../typedeclaration";
 import Alert from "../alert/alert";
 
-const LoginCard = ({ switchCards, setjwt, setuid }: any) => {
+const LoginCard = ({ switchCards}: any) => {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
-
-  const [formValue, setformValue] = useState<LoginValue>();
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const privacyRef = useRef<HTMLInputElement>(null);
 
   const [alert, setAlert] = useState<AlertType>();
 
@@ -25,45 +26,34 @@ const LoginCard = ({ switchCards, setjwt, setuid }: any) => {
     setPasswordVisible(!isPasswordVisible);
   };
 
-  const handleInputChange = (e: any) => {
-    const updatedFormValue =
-      e.target.name === "privacyCheck"
-        ? { ...formValue, [e.target.name]: e.target.checked }
-        : { ...formValue, [e.target.name]: e.target.value };
-    setformValue(updatedFormValue);
-  };
-
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
-    if (formValue?.email && formValue?.password && formValue?.privacyCheck) {
+    const email = emailRef.current?.value;
+    const password = passwordRef.current?.value;
+    const privacy = privacyRef.current?.value;
+    
+    if (email && password && privacy) {
       setAlert({
         type: "",
         body: "",
       });
-      Axios("")
-        .post(`${process.env.STRAPI_URL}/api/auth/local`, {
-          identifier: formValue?.email,
-          password: formValue?.password,
-        })
-        .then((res) => {
-          // Handle success.
-          setAlert({
-            type: "success",
-            body: "Logged in Successfully. Redirecting...",
-          });
-          console.log(res.data)
-          setjwt(res.data.jwt);
-          setuid(res.data.user.id);
-          router.push("/");
-        })
-        .catch((error) => {
-          console.log(error)
-          // Handle error.
-          setAlert({
-            type: "error",
-            body: error.message,
-          });
+      try {
+        await axios.post("/api/auth/login", {
+          email: email,
+          password: password,
         });
+        router.replace("/");
+        // Handle success.
+        setAlert({
+          type: "success",
+          body: "Logged in Successfully. Redirecting...",
+        });
+      } catch (error: any) {
+        setAlert({
+          type: "error",
+          body: error.message,
+        });
+      }
     } else {
       setAlert({
         type: "error",
@@ -83,19 +73,15 @@ const LoginCard = ({ switchCards, setjwt, setuid }: any) => {
           <Alert type={alert.type} body={alert.body} />
         </div>
       )}
-      <form
-        onSubmit={handleSubmit}
-        action="Login"
-        className="space-y-3 py-10 pt-5 flex flex-col items-center px-8"
-      >
+      <form className="space-y-3 py-10 pt-5 flex flex-col items-center px-8">
         <div className=" authentication-input-container">
           <AiOutlineMail />
           <input
+            ref={emailRef}
             type="email"
             name="email"
             placeholder="Email"
             className="authentication-input"
-            onChange={handleInputChange}
           />
         </div>
         <div className=" authentication-input-container relative">
@@ -105,7 +91,7 @@ const LoginCard = ({ switchCards, setjwt, setuid }: any) => {
             type={isPasswordVisible ? "text" : "password"}
             placeholder="Password"
             className="authentication-input"
-            onChange={handleInputChange}
+            ref={passwordRef}
           />
           <button
             className="absolute right-5 text-xl"
@@ -119,13 +105,14 @@ const LoginCard = ({ switchCards, setjwt, setuid }: any) => {
             type="checkbox"
             className=""
             name="privacyCheck"
-            onChange={handleInputChange}
+            ref={privacyRef}
           />
           <p>I agree to all the terms and condition.</p>
         </div>
         <button
           type="submit"
           className="w-full bg-purple-500 text-white font-bold py-3 text-md rounded-md"
+          onClick={handleSubmit}
         >
           Login
         </button>

@@ -106,6 +106,7 @@ export const CleanUserResponse = (user: any) => {
 
 export const CleanUserDetailsResponse = (user: any) => {
   const temp: UserDetails = {
+    pfpid: user.profilepic === null ? null : user.profilepic.id,
     id: user.id,
     username: user.username,
     profilepic:
@@ -122,6 +123,7 @@ export const CleanUserDetailsResponse = (user: any) => {
 
 export const CleanProfileUserDetailsResponse = (user: any) => {
   const temp: UserDetails = {
+    pfpid: user.profilepic === null ? null : user.profilepic.id,
     id: user.id,
     username: user.username,
     bio: user.bio,
@@ -135,6 +137,7 @@ export const CleanProfileUserDetailsResponse = (user: any) => {
     followingCount: user.followings.length,
     postsCount: user.posts.length,
     posts: CleanProfilePostResponseArray(user.posts),
+    likedPosts: CleanProfilePostResponseArray(user.likedPosts),
     followers:
       user.followers && user.followers.length !== 0
         ? user.followers.map((user: any) =>

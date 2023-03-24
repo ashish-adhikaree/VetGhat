@@ -1,48 +1,47 @@
-import { Blob } from "buffer";
 import Image from "next/image";
 import React, { useRef, useState } from "react";
 import { FaCamera } from "react-icons/fa";
 import Axios from "../../axios";
+import { loaderProp } from "../../reusables";
 
-const EditProfileCard = ({ user, setEditingInProgress, jwt, socket }: any) => {
+const EditProfileCard = ({ user, setEditingInProgress, socket }: any) => {
   const username = useRef<any>();
   const bio = useRef<any>();
-  const [src, setSRC] = useState<string>(
-    user.profilepic.url
-  );
+  const [src, setSRC] = useState<string>(user.profilepic.url);
   const [imageData, setImageData] = useState<any>();
 
-  const handleUpdate = async() => {
-    let data: any;
-    data = {
-      username: username.current.value,
-      bio: bio.current.value,
-    };
-    console.log(data);
+  const handleUpdate = async () => {
     if (imageData) {
-      await Axios(jwt)
-        .post(`${process.env.STRAPI_URL}/api/upload`, imageData)
-        .then((res) => {
-          console.log(res);
-          data = {
+      try {
+        const res = await Axios().post(
+          `${process.env.STRAPI_URL}/api/upload`,
+          imageData
+        );
+        try {
+          await Axios().put(`${process.env.STRAPI_URL}/api/users/${user.id}`, {
             username: username.current.value,
             bio: bio.current.value,
             profilepic: res.data[0].id,
-          };
-        })
-        .catch((err) => console.log(err));
-    }
-    Axios(jwt)
-      .put(`${process.env.STRAPI_URL}/api/users/${user.id}`, data)
-      .then((res) => {
-        socket.emit("updateuser", "user updated");
-        console.log(res);
-      })
-      .catch((err) => {
+          });
+          socket.emit("updateuser", "user updated");
+          if (user.pfpid !== null) {
+            await Axios().delete(
+              `${process.env.STRAPI_URL}/api/upload/files/${user.pfpid}`
+            );
+          }
+        } catch (err) {
+          console.log(err);
+          await Axios().delete(
+            `${process.env.STRAPI_URL}/api/upload/files/${res.data[0].id}`
+          );
+        }
+      } catch (err) {
         console.log(err);
-      });
+      }
+    }
     setEditingInProgress(false);
   };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const form = new FormData();
@@ -59,6 +58,7 @@ const EditProfileCard = ({ user, setEditingInProgress, jwt, socket }: any) => {
         <p className="font-bold text-xl text-gray-600">Edit Profile</p>
         <div className="group relative flex items-center justify-center overflow-hidden rounded-full">
           <Image
+            loader={loaderProp}
             className="rounded-full h-40 w-40"
             alt="profile-pic"
             width={150}

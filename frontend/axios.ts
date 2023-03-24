@@ -1,10 +1,8 @@
 import axios from "axios";
-const Axios = (jwt:string) => {
+const Axios = () => {
   return axios.create({
     baseURL: `${process.env.STRAPI_URL}/api`,
-    headers: {
-      Authorization: `Bearer ${jwt}`,
-    },
+    withCredentials: true
   });
 };
 

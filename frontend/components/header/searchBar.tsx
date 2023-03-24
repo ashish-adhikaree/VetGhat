@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { MdPersonSearch } from "react-icons/md";
 import Axios from "../../axios";
-import cookieCutter from "cookie-cutter";
 import axios, { CancelTokenSource } from "axios";
 import Link from "next/link";
 import { searchUser } from "../../typedeclaration";
 import Image from "next/image";
 import { CleanStrapiUserSearchResponse } from "../../helper_functions/cleanStrapiResponse";
+import { loaderProp } from "../../reusables";
 const SearchBar = () => {
-  const [jwt, setJWT] = useState("");
   const [searchValue, setSearchValue] = useState<string>();
   const [search_suggestion_loading, setSearchSuggestionLoading] =
     useState<boolean>();
@@ -26,7 +25,7 @@ const SearchBar = () => {
       cancelToken.current = token;
       setSearchSuggestionLoading(true);
       setTimeout(() => {
-        Axios(jwt)
+        Axios()
           .get(`${process.env.STRAPI_URL}/api/users-permissions/search`, {
             params: {
               populate: ["profilepic"],
@@ -44,10 +43,6 @@ const SearchBar = () => {
     }
     setSearchValue(value);
   };
-
-  useEffect(() => {
-    setJWT(cookieCutter.get("jwt"));
-  }, []);
 
   return (
     <div className="relative">
@@ -72,7 +67,7 @@ const SearchBar = () => {
               search_suggestion.map((user: searchUser, index) => {
                 return (
                   <div key={index} className="flex items-center p-3 space-x-3 hover:bg-white">
-                    <Image className="rounded-full" height={40} width={40} alt={`${user.username}'s profilepic`} src={user.profilepic.url} priority={true}/>
+                    <Image loader={loaderProp} className="rounded-full h-[40px] w-[40px]" height={40} width={40} alt={`${user.username}'s profilepic`} src={user.profilepic.url} priority={true}/>
                     <Link className="hover:underline" as={`/profile/${user.id}`} href={`/profile/${user.id}`}>{user.username}</Link>
                   </div>
                 );
