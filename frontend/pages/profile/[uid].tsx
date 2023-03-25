@@ -59,9 +59,7 @@ const Profile = ({ socket }: { socket: Socket }) => {
       const id = router.query.uid.toString();
       setIsUser(false);
       const userInLocalStorage = localStorage.getItem("user");
-      if (userInLocalStorage === null) {
-        router.push("/");
-      } else {
+      if (userInLocalStorage !== null) {
         const user = JSON.parse(userInLocalStorage);
         if (id === user.id.toString()) {
           setIsUser(true);

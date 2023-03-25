@@ -2,19 +2,22 @@ import UserAvatar from "../reusables/userAvatar";
 import { GiCancel } from "react-icons/gi";
 import { HiOutlinePhotograph } from "react-icons/hi";
 import React, { useState } from "react";
-import { PostFormData, UserDetails } from "../../typedeclaration";
+import { Post, PostFormData, UserDetails } from "../../typedeclaration";
 import Image from "next/image";
 import Axios from "../../axios";
+import { CleanPostResponse } from "../../helper_functions/cleanStrapiResponse";
 
 type PROPS = {
   closePostCardExtended: any;
   user: UserDetails;
   setAlert: any;
+  setPosts: React.Dispatch<React.SetStateAction<Post[] | undefined>>;
 };
 const CreatePostCardExtended: React.FC<PROPS> = ({
   closePostCardExtended,
   user,
   setAlert,
+  setPosts,
 }) => {
   const [formData, setFormData] = useState<PostFormData>({
     files: [],
@@ -62,8 +65,28 @@ const CreatePostCardExtended: React.FC<PROPS> = ({
       form.append("data", JSON.stringify(data));
 
       Axios()
-        .post(`${process.env.STRAPI_URL}/api/posts`, form)
+        .post(`${process.env.STRAPI_URL}/api/posts`, form, {
+          params: {
+            populate: [
+              "author.profilepic",
+              "author.posts",
+              "content",
+              "comments",
+              "comments.author",
+              "comments.author.profilepic",
+              "hearts",
+              "hearts.profilepic",
+            ],
+          },
+        })
         .then((res) => {
+          const temp = CleanPostResponse(res.data.data);
+          setPosts((oldArray) => {
+            if (oldArray) {
+              return [temp, ...oldArray];
+            }
+            return [temp];
+          });
           setAlert({
             type: "success",
             body: "Post Created Successfully",

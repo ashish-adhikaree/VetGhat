@@ -21,17 +21,14 @@ const ProfileSection: React.FC = () => {
     if (userOnLocalStorage !== null) {
       const user = JSON.parse(userOnLocalStorage);
       setUserDetails(user);
-    } else {
-      router.reload();
     }
-
   }, []);
 
   const handleLogout = async () => {
     try {
       await axios.get("/api/auth/logout");
       localStorage.removeItem('user')
-      router.replace("/login");
+      router.push("/");
     } catch (err) {
       console.log(err);
     }
@@ -49,6 +46,7 @@ const ProfileSection: React.FC = () => {
             height={35}
             width={35}
             onClick={handleClick}
+            unoptimized
           />
         </div>
       )}

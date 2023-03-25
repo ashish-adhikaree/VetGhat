@@ -12,6 +12,7 @@ const UserAvatar = ({ src }: { src: string }) => {
       width={50}
       height={50}
       priority = {true}
+      unoptimized
     />
     </div>
     

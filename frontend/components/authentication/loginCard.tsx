@@ -42,7 +42,7 @@ const LoginCard = ({ switchCards}: any) => {
           email: email,
           password: password,
         });
-        router.replace("/");
+        router.push("/");
         // Handle success.
         setAlert({
           type: "success",

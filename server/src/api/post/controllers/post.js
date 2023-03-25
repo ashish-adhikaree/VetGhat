@@ -5,35 +5,27 @@
  */
 
 const { createCoreController } = require("@strapi/strapi").factories;
-const axios = require('axios')
+const { getService } = require("@strapi/plugin-users-permissions/server/utils");
 
 module.exports = createCoreController("api::post.post", ({ strapi }) => ({
   async findFriendsPosts(ctx) {
-    const posts = await super.find(ctx);
     let response = [];
     let followings = [];
     try {
-      const user = await axios.get(`${process.env.STRAPI_URL}/api/users/me`, {
-        params: {
-          populate: ["followings"],
-        },
-        headers: {
-          Authorization: ctx.request.header.authorization,
-        },
+      const posts = await super.find(ctx);
+      const user = await getService("user").fetch(1, {
+        populate: ["followings"],
       });
-      followings = user.data.followings.map((user) => user.id);
+      followings = user.followings.map((user) => user.id);
+      console.log(followings);
+      posts.data.forEach((post) => {
+        if (followings.includes(post.attributes.author.data.id)) {
+          response.push(post);
+        }
+      });
     } catch (err) {
       console.log(err);
     }
-    posts.data.forEach((post) => {
-      if (followings.includes(post.attributes.author.data.id)) {
-        response.push(post);
-      }
-    });
-    return response;
-  },
-  async find(ctx) {
-    const response = await super.find(ctx);
     return response;
   },
 
@@ -43,12 +35,32 @@ module.exports = createCoreController("api::post.post", ({ strapi }) => ({
       .query("api::post.post")
       .findOne({ populate: ["author", "content"], where: { id: postid } });
     if (post.author.id === ctx.state.user.id) {
+      post.content.map(async (item) => {
+        try {
+          // This will delete the image entry from Strapi.
+          const imageEntry = await strapi.db
+            .query("plugin::upload.file")
+            .delete({
+              where: { id: item.id },
+            });
+          // This will delete corresponding image files under the *upload* folder.
+          await strapi.plugins.upload.services.upload.remove(imageEntry);
+        } catch (err) {
+          console.log(err);
+        }
+      });
       console.log("Yes you are author");
+      console.log(post);
       return await super.delete(ctx);
     } else {
       ctx.response.status = 404;
       ctx.response.message = "Only Author can delete the post";
     }
+  },
+
+  async find(ctx) {
+    const response = await super.find(ctx);
+    return response;
   },
 
   async create(ctx) {

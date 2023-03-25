@@ -1,11 +1,11 @@
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import { useEffect, useRef, useState } from "react";
-import cookieCutter from "cookie-cutter";
 import { Socket } from "socket.io-client";
 import { Router, useRouter } from "next/router";
 import NProgress from "nprogress";
 import Head from "next/head";
+import axios from "axios";
 
 export default function App({ Component, pageProps }: AppProps) {
   const isSocketPresent = useRef(false);
@@ -23,26 +23,31 @@ export default function App({ Component, pageProps }: AppProps) {
     });
   }, [Router]);
 
-  useEffect(() => {
-    if (!isSocketPresent.current) {
-      const jwt = cookieCutter.get("jwt");
-
+  const connectSocket = async () => {
+    try {
+      const { data } = await axios.get("/api/auth/verifytoken");
       const { io } = require("socket.io-client");
-
       // token will be verified, connection will be rejected if not a valid JWT
       const temp = io(process.env.STRAPI_URL, {
         auth: {
-          token: jwt,
+          token: data.jwt,
         },
       });
       setSocket(temp);
-
       temp.on("connect", () => {
         console.log("connected");
       });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    if (!isSocketPresent.current) {
+      connectSocket();
       return () => {
         isSocketPresent.current = true;
-        socket?.disconnect()
+        socket?.disconnect();
       };
     }
   }, []);

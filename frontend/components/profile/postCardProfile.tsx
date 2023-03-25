@@ -32,6 +32,7 @@ const PostCardProfile = ({ post }: { post: ProfilePost }) => {
         width={200}
         src={`${process.env.STRAPI_URL  + post.thumbnail.url}`}
         priority={true}
+        unoptimized
       />
     </Link>
   );

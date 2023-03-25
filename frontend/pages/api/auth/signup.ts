@@ -14,7 +14,6 @@ export default function handler(
       password: req.body.password,
     })
     .then((response) => {
-      console.log(response.data);
       setCookie("jwt", response.data.jwt, {
         req,
         res,

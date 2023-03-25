@@ -121,6 +121,7 @@ const ProfileCard = ({
           loader={loaderProp}
           src={user.profilepic.url}
           priority={true}
+          unoptimized
         />
       </div>
       <div className="space-y-5 bg-white p-5 md:p-10 rounded-md">

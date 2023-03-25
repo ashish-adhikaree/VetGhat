@@ -52,7 +52,6 @@ const SearchBar = () => {
           type="text"
           name="usersearch"
           placeholder="Search User"
-          defaultValue=""
           value={searchValue}
           onChange={changeSearchValue}
           autoComplete="off"

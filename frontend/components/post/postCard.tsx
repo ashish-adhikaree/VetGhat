@@ -21,15 +21,14 @@ import HeartCard from "./heartCard";
 import { useRouter } from "next/router";
 import { Socket } from "socket.io-client";
 import { loaderProp } from "../../reusables";
-const PostCard = ({
-  post,
-  setAlert,
-  socket,
-}: {
+
+type PROPS = {
   post: Post;
   setAlert: any;
   socket: Socket;
-}) => {
+  setPosts?: React.Dispatch<React.SetStateAction<Post[] | undefined>>;
+};
+const PostCard: React.FC<PROPS> = ({ post, setAlert, socket, setPosts }) => {
   const comment = useRef<HTMLInputElement>(null);
   const [uid, setuid] = useState("");
   const [showComments, setShowComments] = useState(false);
@@ -89,6 +88,8 @@ const PostCard = ({
       Axios().put(`${process.env.STRAPI_URL}/api/users/${uid}`, {
         likedPosts: updatedLikedPosts,
       });
+      console.log("hero")
+      console.log("socket", socket)
       socket.emit("updateLikes", "likesUpdated");
     } catch (err) {
       console.log(err);
@@ -142,6 +143,18 @@ const PostCard = ({
     Axios()
       .delete(`${process.env.STRAPI_URL}/api/posts/${post.id}`)
       .then((res) => {
+        if (setPosts) {
+          setPosts((oldArray) => {
+            if (oldArray) {
+              const newArray = oldArray.filter(
+                (existingpost) => existingpost.id !== post.id
+              );
+              console.log(newArray);
+              return newArray;
+            }
+            return oldArray;
+          });
+        }
         setAlert({
           type: "success",
           body: "Post Deleted Successfully",
@@ -254,6 +267,7 @@ const PostCard = ({
               width={400}
               height={400}
               priority={true}
+              unoptimized
             />
           </div>
         </Link>

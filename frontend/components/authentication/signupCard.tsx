@@ -12,7 +12,7 @@ import Axios from "../../axios";
 import { AlertType, LoginValue } from "../../typedeclaration";
 import Alert from "../alert/alert";
 
-const SignupCard = ({ switchCards, setjwt, setuid }: any) => {
+const SignupCard = ({ switchCards }: any) => {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
 
   const [formValue, setformValue] = useState<LoginValue>();
@@ -51,7 +51,7 @@ const SignupCard = ({ switchCards, setjwt, setuid }: any) => {
             email: formValue.email,
             password: formValue.password,
           });
-          router.replace("/");
+          router.push("/");
           // Handle success.
           setAlert({
             type: "success",

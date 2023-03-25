@@ -64,6 +64,7 @@ const ImageCarousel = ({
               width={400}
               height={400}
               priority={true}
+              unoptimized
             />
           </Link>
         ) : (
@@ -77,6 +78,7 @@ const ImageCarousel = ({
             width={400}
             height={400}
             priority={true}
+            unoptimized
           />
         )}
       </div>

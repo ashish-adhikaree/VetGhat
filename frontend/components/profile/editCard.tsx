@@ -23,6 +23,7 @@ const EditProfileCard = ({ user, setEditingInProgress, socket }: any) => {
             bio: bio.current.value,
             profilepic: res.data[0].id,
           });
+          localStorage.removeItem('user')
           socket.emit("updateuser", "user updated");
           if (user.pfpid !== null) {
             await Axios().delete(

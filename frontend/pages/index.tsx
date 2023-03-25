@@ -117,7 +117,6 @@ export default function Home({ socket }: { socket: Socket }) {
         })
         .then((res) => {
           const temp = CleanUserDetailsResponse(res.data);
-          console.log("temp", temp)
           localStorage.setItem("user", JSON.stringify(temp));
           setUserDetails(temp);
         })
@@ -132,22 +131,14 @@ export default function Home({ socket }: { socket: Socket }) {
 
     //  wait until socket connects before adding event listeners
     if (socket) {
-      socket.on("post:create", () => {
-        updatePosts(page);
-      });
       socket.on("likesUpdated", () => {
         updatePosts(page);
       });
       socket.on("comment:create", () => {
         updatePosts(page);
       });
-      socket.on("post:delete", () => {
-        updatePosts(page);
-      });
     }
-    return () => {
-      socket.disconnect();
-    };
+
   }, []);
 
   const handlePrev = () => {
@@ -160,7 +151,7 @@ export default function Home({ socket }: { socket: Socket }) {
     updatePosts(page + 1);
   };
 
-  const handlePostsTypeChange = (e: any) => {
+  const handlePostsTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setPostsType(e.target.value);
   };
 
@@ -190,6 +181,7 @@ export default function Home({ socket }: { socket: Socket }) {
             />
             {postCardExtendedIsVisible && (
               <CreatePostCardExtended
+                setPosts = {setPosts}
                 setAlert={setAlert}
                 closePostCardExtended={changePostCardExtendedState}
                 user={userDetails}
@@ -209,6 +201,7 @@ export default function Home({ socket }: { socket: Socket }) {
               posts.map((post: Post, index) => {
                 return (
                   <PostCard
+                    setPosts = {setPosts}
                     socket={socket}
                     setAlert={setAlert}
                     key={index}
