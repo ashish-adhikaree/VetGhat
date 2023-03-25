@@ -5,7 +5,7 @@ module.exports = ({ env }) => ({
       config: {
         IOServerOptions: {
           cors: {
-            origin: "http://localhost:3000",
+            origin: env('FRONTENDURL', "http://localhost:3000"),
             methods: ["GET", "POST", "PUT", "DELETE"],
             credentials: true,
           },
