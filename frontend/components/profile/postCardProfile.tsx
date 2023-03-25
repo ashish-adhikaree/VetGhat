@@ -4,6 +4,7 @@ import { AiFillHeart } from "react-icons/ai";
 import { RiCheckboxMultipleBlankFill } from "react-icons/ri";
 import { ProfilePost } from "../../typedeclaration";
 import Link from "next/link";
+import { loaderProp } from "../../reusables";
 
 const PostCardProfile = ({ post }: { post: ProfilePost }) => {
   return (
@@ -24,12 +25,14 @@ const PostCardProfile = ({ post }: { post: ProfilePost }) => {
         </div>
       </div>
       <Image
+        loader={loaderProp}
         className="h-full w-full object-cover"
         alt="post-image"
         height={200}
         width={200}
         src={`${process.env.STRAPI_URL  + post.thumbnail.url}`}
         priority={true}
+        unoptimized
       />
     </Link>
   );

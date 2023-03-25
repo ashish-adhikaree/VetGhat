@@ -2,23 +2,25 @@ import UserAvatar from "../reusables/userAvatar";
 import { GiCancel } from "react-icons/gi";
 import { HiOutlinePhotograph } from "react-icons/hi";
 import React, { useState } from "react";
-import {PostFormData, UserDetails } from "../../typedeclaration";
+import { Post, PostFormData, UserDetails } from "../../typedeclaration";
 import Image from "next/image";
 import Axios from "../../axios";
+import { CleanPostResponse } from "../../helper_functions/cleanStrapiResponse";
 
-const CreatePostCardExtended = ({
-  closePostCardExtended,
-  jwt,
-  user,
-  setAlert
-}: {
+type PROPS = {
   closePostCardExtended: any;
-  jwt: string;
   user: UserDetails;
-  setAlert: any
+  setAlert: any;
+  setPosts: React.Dispatch<React.SetStateAction<Post[] | undefined>>;
+};
+const CreatePostCardExtended: React.FC<PROPS> = ({
+  closePostCardExtended,
+  user,
+  setAlert,
+  setPosts,
 }) => {
   const [formData, setFormData] = useState<PostFormData>({
-    files: []
+    files: [],
   });
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
 
@@ -52,19 +54,39 @@ const CreatePostCardExtended = ({
 
   const handleSubmit = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
-    if (formData.files.length !== 0){
+    if (formData.files.length !== 0) {
       const data = {
         caption: formData.caption,
       };
       const form = new FormData();
-      for (let i=0; i<formData.files?.length; i++){
-        form.append("files.content", formData.files[i])
+      for (let i = 0; i < formData.files?.length; i++) {
+        form.append("files.content", formData.files[i]);
       }
       form.append("data", JSON.stringify(data));
-  
-      Axios(jwt)
-        .post(`${process.env.STRAPI_URL}/api/posts`, form)
+
+      Axios()
+        .post(`${process.env.STRAPI_URL}/api/posts`, form, {
+          params: {
+            populate: [
+              "author.profilepic",
+              "author.posts",
+              "content",
+              "comments",
+              "comments.author",
+              "comments.author.profilepic",
+              "hearts",
+              "hearts.profilepic",
+            ],
+          },
+        })
         .then((res) => {
+          const temp = CleanPostResponse(res.data.data);
+          setPosts((oldArray) => {
+            if (oldArray) {
+              return [temp, ...oldArray];
+            }
+            return [temp];
+          });
           setAlert({
             type: "success",
             body: "Post Created Successfully",
@@ -76,7 +98,7 @@ const CreatePostCardExtended = ({
         .catch((err) => console.log(err));
       closePostCardExtended(false);
       window.onscroll = () => {};
-    }else{
+    } else {
       setAlert({
         type: "error",
         body: "No images selected",

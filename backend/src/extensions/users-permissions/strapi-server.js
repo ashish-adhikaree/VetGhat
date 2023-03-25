@@ -1,4 +1,5 @@
-import { getService } from "@strapi/plugin-users-permissions/server/utils";
+const { getService } = require("@strapi/plugin-users-permissions/server/utils");
+
 module.exports = (plugin) => {
   for (let i = 0; i < plugin.routes["content-api"].routes.length; i++) {
     const route = plugin.routes["content-api"].routes[i];
@@ -27,15 +28,15 @@ module.exports = (plugin) => {
     let response = [];
     const users = await getService("user").fetchAll(ctx.query);
     users.forEach((user) => {
-      if(user.username.toLowerCase().includes(name.toLowerCase())){
+      if (user.username.toLowerCase().includes(name.toLowerCase())) {
         response.push({
           id: user.id,
           username: user.username,
-          profilepic: user.profilepic
-        })
+          profilepic: user.profilepic,
+        });
       }
     });
-    return response
+    return response;
   };
 
   plugin.routes["content-api"].routes.push({

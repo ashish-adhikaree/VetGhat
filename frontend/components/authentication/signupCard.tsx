@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import {
@@ -11,7 +12,7 @@ import Axios from "../../axios";
 import { AlertType, LoginValue } from "../../typedeclaration";
 import Alert from "../alert/alert";
 
-const SignupCard = ({ switchCards, setjwt, setuid }: any) => {
+const SignupCard = ({ switchCards }: any) => {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
 
   const [formValue, setformValue] = useState<LoginValue>();
@@ -33,7 +34,7 @@ const SignupCard = ({ switchCards, setjwt, setuid }: any) => {
     setformValue(updatedFormValue);
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     if (
       formValue?.name &&
@@ -44,31 +45,24 @@ const SignupCard = ({ switchCards, setjwt, setuid }: any) => {
     ) {
       if (formValue.confirmPassword === formValue.password) {
         // Request API.
-
-        Axios("")
-          .post(`${process.env.STRAPI_URL}/api/auth/local/register`, {
+        try {
+          await axios.post("/api/auth/signup", {
             username: formValue.name,
             email: formValue.email,
             password: formValue.password,
-          })
-          .then((res) => {
-            // Handle success.
-            setAlert({
-              type: "success",
-              body: "Account Created Successfully. Redirecting...",
-            });
-            setjwt(res.data.jwt);
-            setuid(res.data.user.id);
-            router.push("/");
-          })
-          .catch((error) => {
-            console.log(error)
-            // Handle error.
-            setAlert({
-              type: "error",
-              body: error.message,
-            });
           });
+          router.push("/");
+          // Handle success.
+          setAlert({
+            type: "success",
+            body: "Logged in Successfully. Redirecting...",
+          });
+        } catch (error: any) {
+          setAlert({
+            type: "error",
+            body: error.message,
+          });
+        }
       } else {
         setAlert({
           type: "error",

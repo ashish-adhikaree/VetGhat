@@ -7,6 +7,7 @@ import {
   BsFillArrowRightCircleFill,
 } from "react-icons/bs";
 import Link from "next/link";
+import { loaderProp } from "../../reusables";
 
 const ImageCarousel = ({
   images,
@@ -53,6 +54,7 @@ const ImageCarousel = ({
         {link ? (
           <Link as={link} href={link || ""}>
             <Image
+              loader={loaderProp}
               draggable="false"
               className={`h-full w-full ${
                 singlePost ? "object-contain" : "object-cover"
@@ -62,6 +64,7 @@ const ImageCarousel = ({
               width={400}
               height={400}
               priority={true}
+              unoptimized
             />
           </Link>
         ) : (
@@ -75,6 +78,7 @@ const ImageCarousel = ({
             width={400}
             height={400}
             priority={true}
+            unoptimized
           />
         )}
       </div>

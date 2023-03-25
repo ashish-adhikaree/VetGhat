@@ -7,9 +7,8 @@ import {
   CleanPostResponseArray,
   CleanUserDetailsResponse,
 } from "../helper_functions/cleanStrapiResponse";
-import { LegacyRef, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Layout from "../components/Layout/layout";
-import cookieCutter from "cookie-cutter";
 import Loader from "../components/post/loader";
 import LeftSidebar from "../components/leftsidebar/leftsidebar";
 import RightSidebar from "../components/rightsidebar/rightsidebar";
@@ -21,21 +20,18 @@ export default function Home({ socket }: { socket: Socket }) {
   const [posts, setPosts] = useState<Post[]>();
   const [followingsPosts, setFollowingsPosts] = useState<Post[]>();
   const [isLoading, setIsLoading] = useState(true);
-  const [jwt, setjwt] = useState("");
   const [postCardExtendedIsVisible, setpostCardExtendedIsVisible] =
     useState(false);
   const [alert, setAlert] = useState<AlertType>();
   const [userDetails, setUserDetails] = useState<UserDetails>();
   const [poststype, setPostsType] = useState("allposts");
   const postTypeSelect = useRef<any>();
-  const isFirstLoad = useRef(true);
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
 
   // Getting posts from user you follow
-  const getFollowingsPosts = (page:number) => {
-    const jwt = cookieCutter.get("jwt");
-    Axios(jwt)
+  const getFollowingsPosts = (page: number) => {
+    Axios()
       .get(`${process.env.STRAPI_URL}/api/findfriendsposts`, {
         params: {
           populate: [
@@ -62,10 +58,9 @@ export default function Home({ socket }: { socket: Socket }) {
   };
 
   // Getting posts
-  const getPosts = (page:number) => {
-    console.log("pagenumber", page)
-    const jwt = cookieCutter.get("jwt");
-    Axios(jwt)
+  const getPosts = (page: number) => {
+    console.log("pagenumber", page);
+    Axios()
       .get(`${process.env.STRAPI_URL}/api/posts`, {
         params: {
           pagination: { page: page },
@@ -94,7 +89,7 @@ export default function Home({ socket }: { socket: Socket }) {
       .catch((err) => console.log(err));
   };
 
-  const updatePosts = (page:number) => {
+  const updatePosts = (page: number) => {
     if (postTypeSelect.current?.value === "allposts") {
       getPosts(page);
     } else if (postTypeSelect.current?.value === "followings") {
@@ -103,13 +98,10 @@ export default function Home({ socket }: { socket: Socket }) {
   };
 
   useEffect(() => {
-    if (isFirstLoad.current) {
-      const jwt = cookieCutter.get("jwt");
-
-      setjwt(cookieCutter.get("jwt"));
-
-      // Getting users
-      Axios(jwt)
+    // Getting users
+    const userOnLocalStorage = localStorage.getItem("user");
+    if (userOnLocalStorage === null) {
+      Axios()
         .get(`${process.env.STRAPI_URL}/api/users/me`, {
           params: {
             populate: [
@@ -124,38 +116,42 @@ export default function Home({ socket }: { socket: Socket }) {
           },
         })
         .then((res) => {
-          console.log("user", res.data);
-          setUserDetails(CleanUserDetailsResponse(res.data));
+          const temp = CleanUserDetailsResponse(res.data);
+          localStorage.setItem("user", JSON.stringify(temp));
+          setUserDetails(temp);
         })
         .catch((err) => console.log(err));
-
-      getPosts(page);
-      getFollowingsPosts(page);
-
-      //  wait until socket connects before adding event listeners
-      if (socket) {
-        socket.on("post:create", ()=>{updatePosts(page)});
-        socket.on("likesUpdated", ()=>{updatePosts(page)});
-        socket.on("comment:create", ()=>{updatePosts(page)});
-        socket.on("post:delete", ()=>{updatePosts(page)})
-      }
+    } else {
+      const user = JSON.parse(userOnLocalStorage);
+      setUserDetails(user)
     }
-    return () => {
-      isFirstLoad.current = false;
-    };
+
+    getPosts(page);
+    getFollowingsPosts(page);
+
+    //  wait until socket connects before adding event listeners
+    if (socket) {
+      socket.on("likesUpdated", () => {
+        updatePosts(page);
+      });
+      socket.on("comment:create", () => {
+        updatePosts(page);
+      });
+    }
+
   }, []);
 
   const handlePrev = () => {
     setPage(page - 1);
-    updatePosts(page-1);
+    updatePosts(page - 1);
   };
 
   const handleNext = () => {
     setPage(page + 1);
-    updatePosts(page+1);
+    updatePosts(page + 1);
   };
 
-  const handlePostsTypeChange = (e: any) => {
+  const handlePostsTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setPostsType(e.target.value);
   };
 
@@ -178,15 +174,15 @@ export default function Home({ socket }: { socket: Socket }) {
             </div>
           )}
           <LeftSidebar user={userDetails} />
-          <div className="w-4/5 md:w-1/2 lg:w-1/3 space-y-5 flex flex-col items-center mt-5">
+          <div className="w-4/5 md:w-1/2 lg:w-1/3 space-y-5 flex flex-col items-center mt-5 pb-[60px]">
             <CreatePostCardMini
               openPostCardExtended={changePostCardExtendedState}
               user={userDetails}
             />
             {postCardExtendedIsVisible && (
               <CreatePostCardExtended
+                setPosts = {setPosts}
                 setAlert={setAlert}
-                jwt={jwt}
                 closePostCardExtended={changePostCardExtendedState}
                 user={userDetails}
               />
@@ -205,6 +201,7 @@ export default function Home({ socket }: { socket: Socket }) {
               posts.map((post: Post, index) => {
                 return (
                   <PostCard
+                    setPosts = {setPosts}
                     socket={socket}
                     setAlert={setAlert}
                     key={index}
@@ -226,9 +223,21 @@ export default function Home({ socket }: { socket: Socket }) {
               })}
             {pageCount > 1 && (
               <div>
-                {page !== 1 && <button className="px-4 py-2 bg-gray-800 m-5 text-white"  onClick={handlePrev}>Prev</button>}
+                {page !== 1 && (
+                  <button
+                    className="px-4 py-2 bg-gray-800 m-5 text-white"
+                    onClick={handlePrev}
+                  >
+                    Prev
+                  </button>
+                )}
                 {page !== pageCount && (
-                  <button className="px-4 py-2 bg-gray-800 m-5 text-white" onClick={handleNext}>Next</button>
+                  <button
+                    className="px-4 py-2 bg-gray-800 m-5 text-white"
+                    onClick={handleNext}
+                  >
+                    Next
+                  </button>
                 )}
               </div>
             )}

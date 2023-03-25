@@ -24,30 +24,33 @@ import GlobalAlert from "../../components/alert/globalalert";
 import { Socket } from "socket.io-client";
 import HeartCard from "../../components/post/heartCard";
 import { FiMoreHorizontal } from "react-icons/fi";
+import { loaderProp } from "../../reusables";
 
 const SinglePost = ({ socket }: { socket: Socket }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [post, setPost] = useState<Post>();
-  const [jwt, setjwt] = useState("");
   const comment = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const [uid, setUID] = useState('');
   const [alert, setAlert] = useState<AlertType>();
   const [loved, setLoved] = useState(false);
-  const [uid, setUID] = useState<string>("");
   const [showHearts, setShowHearts] = useState(false);
   const [postActionOpened, setPostActionOpened] = useState<boolean>(false);
   const [isDeleteBoxVisible, setDeleteBoxVisibility] = useState<boolean>(false);
 
   useEffect(() => {
+    const userInLocalStorage = localStorage.getItem("user");
+    if (userInLocalStorage === null) {
+      router.push("/");
+    } else {
+      const user = JSON.parse(userInLocalStorage);
+      setUID(user.id);
+      console.log(user.id)
+    }
     if (router.query.postid) {
       const postid = router.query.postid;
-
-      const jwt = cookieCutter.get("jwt");
-      setjwt(jwt);
-      setUID(cookieCutter.get("uid"));
-
       const getPost = () => {
-        Axios(jwt)
+        Axios()
           .get(`${process.env.STRAPI_URL}/api/posts/${postid}`, {
             params: {
               populate: [
@@ -64,7 +67,7 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
           })
           .then((res) => {
             console.log(res);
-            const post_temp = CleanPostResponse(res.data.data)
+            const post_temp = CleanPostResponse(res.data.data);
             setPost(post_temp);
             if (post_temp) {
               if (post_temp.hearts.length !== 0) {
@@ -80,7 +83,6 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
           .catch((err) => console.log(err));
       };
       getPost();
-      
 
       socket.on("comment:create", () => {
         getPost();
@@ -99,7 +101,7 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
     if (comment.current) {
       if (comment.current.value !== "") {
         try {
-          await Axios(jwt).post(`${process.env.STRAPI_URL}/api/comments`, {
+          await Axios().post(`${process.env.STRAPI_URL}/api/comments`, {
             data: {
               post: post?.id.toString(),
               body: comment.current.value,
@@ -131,7 +133,7 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
     setLoved(!loved);
     let yourLikedPosts: number[] = [];
     try {
-      const res = await Axios(jwt).get(
+      const res = await Axios().get(
         `${process.env.STRAPI_URL}/api/users/${uid}`,
         {
           params: {
@@ -158,7 +160,7 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
     }
 
     try {
-      Axios(jwt).put(`${process.env.STRAPI_URL}/api/users/${uid}`, {
+      Axios().put(`${process.env.STRAPI_URL}/api/users/${uid}`, {
         likedPosts: updatedLikedPosts,
       });
       socket.emit("updateLikes", "likesUpdated");
@@ -179,7 +181,7 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
   };
 
   const handleDelete = () => {
-    Axios(jwt)
+    Axios()
       .delete(`${process.env.STRAPI_URL}/api/posts/${post?.id}`)
       .then((res) => {
         setAlert({
@@ -200,7 +202,7 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
         }, 3000);
       });
     setDeleteBoxVisibility(false);
-    setPostActionOpened(false)
+    setPostActionOpened(false);
   };
 
   if (loading) {
@@ -244,6 +246,7 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
               <ImageCarousel singlePost={true} images={post.content} />
             ) : (
               <Image
+                loader={loaderProp}
                 draggable="false"
                 className="h-full w-full object-contain"
                 alt="post-image"
@@ -309,13 +312,14 @@ const SinglePost = ({ socket }: { socket: Socket }) => {
 
               <div className="px-5 flex items-center space-x-3">
                 <div className="h-[40px] w-[40px]">
-                <Image
-                  className="rounded-full w-full h-full object-cover"
-                  width={40}
-                  height={40}
-                  alt={`${post.author.username}-profilepic`}
-                  src={post.author.profilepic.url}
-                />
+                  <Image
+                    loader={loaderProp}
+                    className="rounded-full w-full h-full object-cover"
+                    width={40}
+                    height={40}
+                    alt={`${post.author.username}-profilepic`}
+                    src={post.author.profilepic.url}
+                  />
                 </div>
                 <div>
                   <span className="font-semibold pr-3 text-blue-500">

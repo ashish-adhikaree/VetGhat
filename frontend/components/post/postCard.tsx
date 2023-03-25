@@ -20,34 +20,38 @@ import CommentCard from "./commentCard";
 import HeartCard from "./heartCard";
 import { useRouter } from "next/router";
 import { Socket } from "socket.io-client";
-const PostCard = ({
-  post,
-  setAlert,
-  socket,
-}: {
+import { loaderProp } from "../../reusables";
+
+type PROPS = {
   post: Post;
   setAlert: any;
   socket: Socket;
-}) => {
+  setPosts?: React.Dispatch<React.SetStateAction<Post[] | undefined>>;
+};
+const PostCard: React.FC<PROPS> = ({ post, setAlert, socket, setPosts }) => {
   const comment = useRef<HTMLInputElement>(null);
-  const [jwt, setjwt] = useState("");
   const [uid, setuid] = useState("");
   const [showComments, setShowComments] = useState(false);
   const [showHearts, setShowHearts] = useState(false);
   const [loved, setLoved] = useState<boolean>();
   const [postActionOpened, setPostActionOpened] = useState<boolean>(false);
   const [isDeleteBoxVisible, setDeleteBoxVisibility] = useState<boolean>(false);
-
+  const router = useRouter();
   useEffect(() => {
-    const jwt = cookieCutter.get("jwt");
-    setjwt(jwt);
-    setuid(cookieCutter.get("uid"));
-    if (post.hearts.length !== 0) {
-      post.hearts.map((user) => {
-        if (user.id.toString() === cookieCutter.get("uid")) {
-          setLoved(true);
-        }
-      });
+    // Getting users
+    const userOnLocalStorage = localStorage.getItem("user");
+    if (userOnLocalStorage !== null) {
+      const user = JSON.parse(userOnLocalStorage);
+      setuid(user.id);
+      if (post.hearts.length !== 0) {
+        post.hearts.map((user) => {
+          if (user.id.toString() === user.id.toString()) {
+            setLoved(true);
+          }
+        });
+      }
+    } else {
+      router.reload();
     }
   }, []);
 
@@ -56,7 +60,7 @@ const PostCard = ({
     setLoved(!loved);
     let yourLikedPosts: number[] = [];
     try {
-      const res = await Axios(jwt).get(
+      const res = await Axios().get(
         `${process.env.STRAPI_URL}/api/users/${uid}`,
         {
           params: {
@@ -81,9 +85,11 @@ const PostCard = ({
     }
 
     try {
-      Axios(jwt).put(`${process.env.STRAPI_URL}/api/users/${uid}`, {
+      Axios().put(`${process.env.STRAPI_URL}/api/users/${uid}`, {
         likedPosts: updatedLikedPosts,
       });
+      console.log("hero")
+      console.log("socket", socket)
       socket.emit("updateLikes", "likesUpdated");
     } catch (err) {
       console.log(err);
@@ -95,7 +101,7 @@ const PostCard = ({
     if (comment.current) {
       if (comment.current.value !== "") {
         try {
-          await Axios(jwt).post(`${process.env.STRAPI_URL}/api/comments`, {
+          await Axios().post(`${process.env.STRAPI_URL}/api/comments`, {
             data: {
               post: post.id.toString(),
               body: comment.current.value,
@@ -132,10 +138,23 @@ const PostCard = ({
       setAlert(undefined);
     }, 3000);
   };
+
   const handleDelete = () => {
-    Axios(jwt)
+    Axios()
       .delete(`${process.env.STRAPI_URL}/api/posts/${post.id}`)
       .then((res) => {
+        if (setPosts) {
+          setPosts((oldArray) => {
+            if (oldArray) {
+              const newArray = oldArray.filter(
+                (existingpost) => existingpost.id !== post.id
+              );
+              console.log(newArray);
+              return newArray;
+            }
+            return oldArray;
+          });
+        }
         setAlert({
           type: "success",
           body: "Post Deleted Successfully",
@@ -154,7 +173,7 @@ const PostCard = ({
         }, 3000);
       });
     setDeleteBoxVisibility(false);
-    setPostActionOpened(false)
+    setPostActionOpened(false);
   };
 
   return (
@@ -240,6 +259,7 @@ const PostCard = ({
         <Link as={`/post/${post.id}`} href={`/post/${post.id}`}>
           <div className="overflow-hidden h-[300px] w-full">
             <Image
+              loader={loaderProp}
               draggable="false"
               className="h-full w-full object-cover"
               alt="post-image"
@@ -247,6 +267,7 @@ const PostCard = ({
               width={400}
               height={400}
               priority={true}
+              unoptimized
             />
           </div>
         </Link>
@@ -273,7 +294,7 @@ const PostCard = ({
           {`Loved by ${
             loved ? (post.hearts.length > 1 ? "you," : "you") : ""
           } ${
-            post.hearts[0].id.toString() === uid
+            post.hearts[0].id.toString() === uid.toString()
               ? post.hearts.length > 1
                 ? post.hearts[1].username
                 : ""
