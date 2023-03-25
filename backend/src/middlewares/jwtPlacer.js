@@ -3,6 +3,7 @@ module.exports = () => {
     console.log(ctx.header.origin)
     if (ctx.header.origin === process.env.FRONTENDURL) {
       const cookies = ctx.request.header.cookie || false;
+      console.log("cookie", cookies)
       if (cookies) {
         let token = cookies
           .split(";")
@@ -13,6 +14,7 @@ module.exports = () => {
         }
       }
     }
+    console.log("updated header", ctx.request.header)
     await next();
   };
 };
