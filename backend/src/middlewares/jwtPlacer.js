@@ -1,6 +1,7 @@
 module.exports = () => {
   return async (ctx, next) => {
     console.log(ctx.header.origin)
+    console.log("env", process.env.FRONTENDURL)
     if (ctx.header.origin === process.env.FRONTENDURL) {
       const cookies = ctx.request.header.cookie || false;
       console.log("cookie", cookies)
