@@ -22,13 +22,11 @@ export default async function handler(
       req,
       res,
       httpOnly: true,
-      sameSite: true,
     });
     setCookie("uid", response.data.user.id, {
       req,
       res,
       httpOnly: true,
-      sameSite: true,
     });
     res.status(200).json({ ...response.data });
   } catch (error: any) {
