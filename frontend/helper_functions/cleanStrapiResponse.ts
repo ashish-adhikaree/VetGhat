@@ -16,7 +16,7 @@ export const CleanPostResponse = (post: any) => {
       profilepic:
         post.attributes.author.data.attributes.profilepic.data !== null
           ? {
-              url:  process.env.STRAPI_URL + post.attributes.author.data.attributes.profilepic.data
+              url: post.attributes.author.data.attributes.profilepic.data
                 .attributes.url,
             }
           : {
@@ -41,7 +41,7 @@ export const CleanPostResponse = (post: any) => {
                 ? {
                     url: "/defaultuser.jpg",
                   }
-                : { url:  process.env.STRAPI_URL + user.attributes.profilepic.data.attributes.url },
+                : { url: user.attributes.profilepic.data.attributes.url },
           }))
         : [],
     comments:
@@ -88,7 +88,7 @@ export const CleanUserResponse = (user: any) => {
     username: user.data.attributes.username,
     profilepic:
       user.data.attributes.profilepic.data !== null
-        ? { url:  process.env.STRAPI_URL + user.data.attributes.profilepic.data.attributes.url }
+        ? { url: user.data.attributes.profilepic.data.attributes.url }
         : {
             url: "/defaultuser.jpg",
           },
@@ -114,7 +114,7 @@ export const CleanUserDetailsResponse = (user: any) => {
         ? {
             url: "/defaultuser.jpg",
           }
-        : { url:  process.env.STRAPI_URL + user.profilepic.url },
+        : { url: user.profilepic.url },
     followersCount: user.followers ? user.followers.length : 0,
   };
 
@@ -132,7 +132,7 @@ export const CleanProfileUserDetailsResponse = (user: any) => {
         ? {
             url: "/defaultuser.jpg",
           }
-        : { url:  process.env.STRAPI_URL + user.profilepic.url },
+        : { url: user.profilepic.url },
     followersCount: user.followers.length,
     followingCount: user.followings.length,
     postsCount: user.posts.length,
@@ -163,7 +163,7 @@ export const CleanFollowersFollowingsResponse = (user: any) => {
         ? {
             url: "/defaultuser.jpg",
           }
-        : { url:  process.env.STRAPI_URL + user.profilepic.url },
+        : { url: user.profilepic.url },
   };
   return temp;
 };
@@ -174,9 +174,7 @@ export const CleanStrapiUserSearchResponse = (data: any) => {
       id: user.id,
       username: user.username,
       profilepic: {
-        url: user.profilepic
-          ? process.env.STRAPI_URL + user.profilepic.url
-          : "/defaultuser.jpg",
+        url: user.profilepic ? user.profilepic.url : "/defaultuser.jpg",
       },
     };
   });

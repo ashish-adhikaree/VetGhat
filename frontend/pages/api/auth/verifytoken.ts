@@ -12,7 +12,9 @@ export default async function Handler(
       res.status(200).json({ jwt: false });
     } else {
       try {
-        await axios.get(`${process.env.STRAPI}/api/users/me`);
+        await axios.get(`${process.env.STRAPI}/api/users/me`, {
+          headers: { "Accept-Encoding": "gzip,deflate,compress" },
+        });
         res.status(200).json({ jwt: jwt });
       } catch {
         res.status(200).json({ jwt: false });

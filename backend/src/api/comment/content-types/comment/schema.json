@@ -25,7 +25,8 @@
       "inversedBy": "comments"
     },
     "body": {
-      "type": "string"
+      "type": "string",
+      "required": true
     }
   }
 }

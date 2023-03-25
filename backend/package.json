@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "vetghat-backend",
   "private": true,
   "version": "0.1.0",
   "description": "A Strapi application",
@@ -10,23 +10,21 @@
     "strapi": "strapi"
   },
   "dependencies": {
-    "@strapi/plugin-graphql": "4.5.3",
-    "@strapi/plugin-i18n": "4.5.3",
-    "@strapi/plugin-users-permissions": "4.5.3",
-    "@strapi/strapi": "4.5.3",
-    "@strapi/utils": "^4.5.4",
-    "axios": "^1.2.1",
-    "better-sqlite3": "7.4.6",
-    "strapi-plugin-io": "^1.1.2"
+    "@strapi/plugin-i18n": "4.8.2",
+    "@strapi/plugin-users-permissions": "4.8.2",
+    "@strapi/provider-upload-cloudinary": "^4.8.2",
+    "@strapi/strapi": "4.8.2",
+    "pg": "8.8.0",
+    "strapi-plugin-io": "^1.1.4"
   },
   "author": {
     "name": "A Strapi developer"
   },
   "strapi": {
-    "uuid": "53cc1190-981b-4b0f-bd94-450bcc1c0fb8"
+    "uuid": "1a5aacd7-4df5-40fc-ae38-887353628c20"
   },
   "engines": {
-    "node": ">=14.19.1 <=16.x.x",
+    "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
   },
   "license": "MIT"

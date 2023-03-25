@@ -3,15 +3,18 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import axios from "axios";
 import { setCookie } from "cookies-next";
 
-export default function handler(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<any>
 ) {
-  axios
+  await axios
     .post(`${process.env.STRAPI}/api/auth/local/register`, {
       username: req.body.username,
       email: req.body.email,
       password: req.body.password,
+    },
+    {
+      headers: { "Accept-Encoding": "gzip,deflate,compress" },
     })
     .then((response) => {
       setCookie("jwt", response.data.jwt, {
